@@ -183,6 +183,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="comm_server.h" />
     <ClInclude Include="EOF_TRASH_SERVER.h" />
     <ClInclude Include="EOF_TRASH_SERVERDlg.h" />
     <ClInclude Include="framework.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="comm_server.cpp" />
     <ClCompile Include="EOF_TRASH_SERVER.cpp" />
     <ClCompile Include="EOF_TRASH_SERVERDlg.cpp" />
     <ClCompile Include="pch.cpp">
