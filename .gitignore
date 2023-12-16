@@ -1,9 +1,43 @@
-# 서드파티 라이브러리는 깃 업로드 제외 @권강현
-EOF_NUGUSEM_SERVER/NUGUSEM_serverGUI/thirdparty/*
-# 클라이언트 프로그램 리눅스 실행파일 빌드 폴더 제외 @권강현
-EOF_NUGUSEM_CLIENT/raspberrypi/main.spec
-EOF_NUGUSEM_CLIENT/raspberrypi/build/*
-EOF_NUGUSEM_CLIENT/raspberrypi/dist/*
+# 모델 학습용 데이터 폴더는 깃 업로드 제외 @권강현
+ArtificialNeuralNetwork/data/train/*
+ArtificialNeuralNetwork/data/val/*
+
+
+# Created by https://www.toptal.com/developers/gitignore/api/venv,jupyternotebooks
+# Edit at https://www.toptal.com/developers/gitignore?templates=venv,jupyternotebooks
+
+### JupyterNotebooks ###
+# gitignore template for Jupyter Notebooks
+# website: http://jupyter.org/
+
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Remove previous ipynb_checkpoints
+#   git rm -r .ipynb_checkpoints/
+
+### venv ###
+# Virtualenv
+# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+.venv
+pip-selfcheck.json
+
+# End of https://www.toptal.com/developers/gitignore/api/venv,jupyternotebooks
+
+
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio

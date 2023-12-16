@@ -1,1 +1,1 @@
-# EOF_StreetTrashFinder
+# EOF_SeparateTrashCollection
