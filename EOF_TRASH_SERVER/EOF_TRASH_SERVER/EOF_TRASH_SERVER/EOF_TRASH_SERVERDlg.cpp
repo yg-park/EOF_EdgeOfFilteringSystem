@@ -10,8 +10,15 @@
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
+
+// console
+#pragma comment(linker, "/ENTRY:WinMainCRTStartup /subsystem:console")
 #endif
 
+//
+CMutex m_mutexUdpEvent;
+CMutex m_mutexTcpEvent;
+//
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -52,8 +59,11 @@ END_MESSAGE_MAP()
 
 CEOFTRASHSERVERDlg::CEOFTRASHSERVERDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_EOF_TRASH_SERVER_DIALOG, pParent)
+	, m_nUdpPort(8888)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
+	m_ImageCtrl.SubclassDlgItem(IDC_IMAGE1, this);
 }
 
 void CEOFTRASHSERVERDlg::DoDataExchange(CDataExchange* pDX)
@@ -65,6 +75,9 @@ BEGIN_MESSAGE_MAP(CEOFTRASHSERVERDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+
+	ON_MESSAGE(WM_USER + 1, OnUdpThreadDone)
+	ON_MESSAGE(WM_USER + 2, OnTcpThreadDone)
 END_MESSAGE_MAP()
 
 
@@ -100,6 +113,14 @@ BOOL CEOFTRASHSERVERDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	
+	// 이벤트 초기화
+	eventUdp.ResetEvent();
+	eventTcp.ResetEvent();
+
+	// 스레드 생성 및 시작
+	pUdpThread = AfxBeginThread(UdpThreadProc, this);
+	pTcpThread = AfxBeginThread(TcpThreadProc, this);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -116,6 +137,7 @@ void CEOFTRASHSERVERDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		CDialogEx::OnSysCommand(nID, lParam);
 	}
 }
+
 
 // 대화 상자에 최소화 단추를 추가할 경우 아이콘을 그리려면
 //  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 애플리케이션의 경우에는
@@ -151,5 +173,115 @@ void CEOFTRASHSERVERDlg::OnPaint()
 HCURSOR CEOFTRASHSERVERDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
+}
+
+
+LRESULT CEOFTRASHSERVERDlg::OnUdpThreadDone(WPARAM wParam, LPARAM lParam)
+{
+	int nDataSize = (int)wParam;
+	const BYTE* pData = (const BYTE*)lParam;
+
+	if (pData != NULL && nDataSize > 0)
+	{
+		cv::Mat image = cv::imdecode(cv::Mat(1, nDataSize, CV_8U, (void*)pData), cv::IMREAD_COLOR);
+
+		if (!image.empty())
+		{
+			// 이미지를 표시할 CImage 생성
+			CImage cImage;
+			cImage.Create(image.cols, image.rows, 24); // 24는 비트 당 색상 비트 수
+
+			// OpenCV Mat 데이터를 CImage에 복사
+			uchar* dstData = (uchar*)cImage.GetBits();
+			memcpy(dstData, image.data, image.rows * image.step);
+
+			// 이미지를 표시할 컨트롤에 이미지 설정
+			m_ImageCtrl.SetBitmap((HBITMAP)cImage.Detach());
+			m_ImageCtrl.Invalidate(); // 컨트롤을 다시 그리도록 갱신 요청
+		}
+
+		// 메모리 해제
+		delete[] pData;
+	}
+
+	return 0;
+}
+
+
+LRESULT CEOFTRASHSERVERDlg::OnTcpThreadDone(WPARAM wParam, LPARAM lParam)
+{
+	// TCP 스레드에서 작업이 완료되면 호출되는 함수
+	// 추가 작업 수행
+	// ...
+	std::cout << "TCP" << std::endl;
+
+	return 0;
+}
+
+
+UINT CALLBACK CEOFTRASHSERVERDlg::UdpThreadProc(LPVOID pParam)
+{
+	CEOFTRASHSERVERDlg* pDlg = (CEOFTRASHSERVERDlg*)pParam;
+
+	// Winsock 초기화
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+		AfxMessageBox(_T("Winsock 초기화에 실패했습니다."));
+		return 1;
+	}
+
+	// UDP 통신 소켓 생성
+	CAsyncSocket udpSocket;
+	long lEvent = FD_READ | FD_WRITE | FD_CLOSE;
+	if (!udpSocket.Create(pDlg->m_nUdpPort, SOCK_DGRAM, lEvent)) {
+		return 1;
+	}
+
+	while (true) {
+		// 뮤텍스 락
+		m_mutexUdpEvent.Lock();
+
+		// 데이터 수신
+		BYTE buffer[1024];
+		int bytesRead = udpSocket.Receive(buffer, sizeof(buffer), 0);
+		if (bytesRead > 0) {
+			// 수신된 데이터를 메인 다이얼로그에 전달
+			BYTE* pData = new BYTE[bytesRead];
+			memcpy(pData, buffer, bytesRead);
+			pDlg->PostMessage(WM_USER + 1, (WPARAM)bytesRead, (LPARAM)pData);
+		}
+		else
+		{
+			pDlg->PostMessage(WM_USER + 1, 0, 0);
+		}
+
+		// 뮤텍스 언락
+		m_mutexTcpEvent.Unlock();
+	}
+	return 0;
+}
+
+UINT CALLBACK CEOFTRASHSERVERDlg::TcpThreadProc(LPVOID pParam)
+{
+	CEOFTRASHSERVERDlg* pDlg = (CEOFTRASHSERVERDlg*)pParam;
+
+	// Tcp Thread의 작업 수행
+	while (true)
+	{
+		// 뮤텍스 락
+		m_mutexTcpEvent.Lock();
+
+		// 문자열 수신 코드
+		// ...
+
+		// 작업이 완료되면 PostMessage로 메시지 전송
+		pDlg->PostMessage(WM_USER + 2, 0, 0);
+
+
+		// 뮤텍스 언락
+		m_mutexUdpEvent.Unlock();
+	}
+
+	return 0;
 }
 
