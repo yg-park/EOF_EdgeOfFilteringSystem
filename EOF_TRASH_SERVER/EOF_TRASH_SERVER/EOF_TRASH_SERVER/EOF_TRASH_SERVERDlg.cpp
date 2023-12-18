@@ -113,10 +113,6 @@ BOOL CEOFTRASHSERVERDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	
-	// 이벤트 초기화
-	eventUdp.ResetEvent();
-	eventTcp.ResetEvent();
 
 	// 스레드 생성 및 시작
 	pUdpThread = AfxBeginThread(UdpThreadProc, this);
@@ -183,22 +179,8 @@ LRESULT CEOFTRASHSERVERDlg::OnUdpThreadDone(WPARAM wParam, LPARAM lParam)
 
 	if (pData != NULL && nDataSize > 0)
 	{
-		cv::Mat image = cv::imdecode(cv::Mat(1, nDataSize, CV_8U, (void*)pData), cv::IMREAD_COLOR);
-
-		if (!image.empty())
-		{
-			// 이미지를 표시할 CImage 생성
-			CImage cImage;
-			cImage.Create(image.cols, image.rows, 24); // 24는 비트 당 색상 비트 수
-
-			// OpenCV Mat 데이터를 CImage에 복사
-			uchar* dstData = (uchar*)cImage.GetBits();
-			memcpy(dstData, image.data, image.rows * image.step);
-
-			// 이미지를 표시할 컨트롤에 이미지 설정
-			m_ImageCtrl.SetBitmap((HBITMAP)cImage.Detach());
-			m_ImageCtrl.Invalidate(); // 컨트롤을 다시 그리도록 갱신 요청
-		}
+		// Byte를 IStream으로 변환
+		// CImage image = Load(IStream)
 
 		// 메모리 해제
 		delete[] pData;
