@@ -1,7 +1,6 @@
 # 모델 학습용 데이터 폴더는 깃 업로드 제외 @권강현
-ArtificialNeuralNetwork/data/train/*
-ArtificialNeuralNetwork/data/val/*
-
+ArtificialNeuralNetwork/data/*
+ArtificialNeuralNetwork/data_from_AI_Hub/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/venv,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=venv,jupyternotebooks
@@ -444,3 +443,5 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio
+
+thirdparty/
