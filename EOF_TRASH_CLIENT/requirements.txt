@@ -1,0 +1,9 @@
+# HW
+# - 라즈베리파이4
+
+# SW
+# - Raspbian GNU/Linux11 (bullseye)
+# - python 3.9.2
+# - OpenCV-python 4.5.1
+# - PyQt5 5.15.10
+
