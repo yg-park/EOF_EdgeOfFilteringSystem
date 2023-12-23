@@ -6,7 +6,7 @@ import time
 
 us_trig_pin = 2  # 트리거 핀
 us_echo_pin = 3  # 에코 핀
-servo_pin = 23
+servo_pin = 23 
 
 
 
