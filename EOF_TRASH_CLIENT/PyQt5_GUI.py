@@ -6,18 +6,25 @@ from PyQt5.QtWidgets import *
 
 from GPIO_HW_control.servo_motor import ServoMotor
 from GPIO_HW_control.ultrasonic_sensor import UltrasonicSensor
+from network.tcp_client import TCPClient
+from network.udp_client import UDPClient
+from model.bottle_classifier import BottleClassifier
 
 # 전역 변수
 flag_us = False
 inference_status = -1
 
-class WebcamThread(QThread):
+
+class MainWorkerThread(QThread):
+    
     def __init__(self):
         super().__init__()
-        self.cap = self.initCam()
+        self.cap = self._initCam()
+        self.bottle_classifier = self._initModel()
+        self.tcp_client, self.udp_client = self._initNetwork()
 
     
-    def initCam(self):
+    def _initCam(self):
         cap = cv2.VideoCapture(0)
 
         if cap.isOpened():
@@ -25,23 +32,51 @@ class WebcamThread(QThread):
         else:
             print("Error: Could not open webcam.")
             return
+        
+
+    def _initModel(self):
+        model_path = './model/eof_bottle_classification_model.pth'
+        bottle_classifier = BottleClassifier(model_path)
+        return bottle_classifier
+
+
+    def _initNetwork(self):
+        TCP_IP = "10.10.15.58"
+        TCP_PORT = 8888
+        UDP_IP = "10.10.15.58"
+        UDP_PORT = 12345
+        tcp_client = TCPClient(TCP_IP, TCP_PORT)
+        udp_client = UDPClient(UDP_IP, UDP_PORT)
+        return tcp_client, udp_client
 
 
     def run(self):
         global flag_us
         global inference_status
 
-        import random
-
         while True:
             ret, frame = self.cap.read()
+            self.udp_client.send_webcam_frame_to_server(frame) # 여기서 udp를 통해 서버로 frame 전송
 
             if flag_us == True:
+                result = self.bottle_classifier.classify(frame)
                 print("모델 inference 발생")
                 
-                inference_status = random.randint(0, 1)
-                print(inference_status)
+                if result == self.bottle_classifier.class_name[0]: # 'nl_bottle'
+                    inference_status = 0
+                    print(f"추론 완료... inference_status = {inference_status}")
+                    self.tcp_client.send_result_to_server(0) # 여기서 tcp를 통해서 서버로 0 전송
+                    time.sleep(1)
 
+                elif result == self.bottle_classifier.class_name[1]: # 'yl_bottle'
+                    inference_status = 1
+                    print(f"추론 완료... inference_status = {inference_status}")
+                    self.tcp_client.send_result_to_server(1) # 여기서 tcp를 통해서 서버로 1 전송
+                    time.sleep(1)
+                    
+                else:
+                    pass
+                
                 flag_us = False
                 pass
 
@@ -121,15 +156,18 @@ class App(QMainWindow):
         self.height = 580
 
         self.initUI()
+        self.initThread()
 
     
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
+
+    def initThread(self):
         # 웹캠 스레드 생성
-        self.thread_webCam = WebcamThread()
-        self.thread_webCam.start()
+        self.thread_mainWorker = MainWorkerThread()
+        self.thread_mainWorker.start()
         
         # 초음파센서 스레드 생성
         self.thread_us = UltrasonicThread()
