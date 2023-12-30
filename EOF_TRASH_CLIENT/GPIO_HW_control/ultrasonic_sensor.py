@@ -1,26 +1,28 @@
 """
 ultra sonic sensor control in raspberry pi 4
 """
-import RPi.GPIO as GPIO
 import time
+import RPi.GPIO as GPIO
+from GPIO_HW_control.hw_interface import HWInterface
 
 
-class UltrasonicSensor:
-    def __init__(self,us_trig_pin,us_echo_pin):
+class UltrasonicSensor(HWInterface):
+    def __init__(self, us_trig_pin, us_echo_pin):
         self.us_trig_pin = us_trig_pin
         self.us_echo_pin = us_echo_pin
-        
+
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.us_trig_pin, GPIO.OUT)
         GPIO.setup(self.us_echo_pin, GPIO.IN)
-        
 
     def __del__(self):
         GPIO.cleanup(self.us_trig_pin)
         GPIO.cleanup(self.us_echo_pin)
 
+    def control(self):
+        """desc:
 
-    def measure_distance(self):
+        """
         # 트리거 신호 발생
         GPIO.output(self.us_trig_pin, GPIO.HIGH)
         time.sleep(0.00001)

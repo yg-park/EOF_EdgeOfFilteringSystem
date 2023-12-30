@@ -1,9 +1,7 @@
-# HW
-# - 라즈베리파이4
+# python --verison 3.9.2
+RPi.GPIO==0.7.1
 
-# SW
-# - Raspbian GNU/Linux11 (bullseye)
-# - python 3.9.2
-# - OpenCV-python 4.5.1
-# - PyQt5 5.15.10
+opencv-python==4.8.1.78
 
+#  
+PyAudio==0.2.14
