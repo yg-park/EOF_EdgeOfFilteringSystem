@@ -1,0 +1,17 @@
+# 파이썬 가상환경 이름은 .server_venv로 할 것
+# (.gitignore에 EOF_THRASH_SERVER/.server_venv/*를 등록함)
+
+# python --verison 3.10.12
+
+# 모델 추론에 필요한 라이브러리
+openvino==2023.0.0
+openvino-model-api==0.1.8
+otx==1.4.4
+numpy>=1.21.0,<=1.23.5  # np.bool was removed in 1.24.0 which was used in openvino runtime
+torch==1.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
+torchvision==0.14.1 --extra-index-url https://download.pytorch.org/whl/cu117
+nncf==2.6.0
+onnx==1.13.0
+
+# GUI 출력에 필요한 라이브러리
+PyQt5==5.15.10
