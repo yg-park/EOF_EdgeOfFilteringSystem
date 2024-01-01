@@ -1,0 +1,35 @@
+{
+    "label_tree": {
+        "type": "tree",
+        "directed": true,
+        "nodes": [],
+        "edges": []
+    },
+    "label_groups": [
+        {
+            "_id": "658ff6e022a27977a1204930",
+            "name": "labels",
+            "label_ids": [
+                "0"
+            ],
+            "relation_type": "EXCLUSIVE"
+        }
+    ],
+    "all_labels": {
+        "0": {
+            "_id": "0",
+            "name": "pet",
+            "color": {
+                "red": 65,
+                "green": 188,
+                "blue": 236,
+                "alpha": 255
+            },
+            "hotkey": "",
+            "domain": "DETECTION",
+            "creation_date": "2023-12-30T10:54:24.018000",
+            "is_empty": false,
+            "is_anomalous": false
+        }
+    }
+}
