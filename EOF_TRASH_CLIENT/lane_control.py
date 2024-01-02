@@ -2,8 +2,9 @@
 ㅇ
 """
 #import threading
-import cv2
 import time
+import cv2
+from GPIO_HW_control.rc_servo_motor import RCServoMotor
 from GPIO_HW_control.servo_motor import ServoMotor
 from GPIO_HW_control.ultrasonic_sensor import UltrasonicSensor
 from Comm.communication import ClientCommunication
@@ -17,7 +18,7 @@ class LaneController:
         """desc:
         
         """
-        # self.rc_servo_motor = ???
+        self.rc_servo_motor = RCServoMotor(pin["RC_SERVO_1"], pin["RC_SERVO_2"])
         self.servo_motor = ServoMotor(pin["SERVO"])
         self.ultra_sonic_sensor = UltrasonicSensor(
             pin["ULTRASONIC_TRIG"], pin["ULTRASONIC_ECHO"]
