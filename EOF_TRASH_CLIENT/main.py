@@ -28,11 +28,13 @@ def main():
     port = {"PORT_IMAGE": UDP_PORT1, "PORT_STR": UDP_PORT2,
             "PORT_VOICE": UDP_PORT3, "PORT_": UDP_PORT4}
 
-    lane_1 = LaneController(pin, port)
-    lane_1.run()
+    lane_1 = LaneController(pin, IP_ADDRESS, port)
+    lane_1.execute()
 
     # lane_2 = LaneController(pin, port)
-    # lane_2.run()
+    # lane_2.execute()
+    
+    # 
 
 
 if __name__ == "__main__":

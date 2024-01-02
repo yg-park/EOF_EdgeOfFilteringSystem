@@ -1,18 +1,19 @@
 """
 ㅇ
 """
-import threading
+#import threading
 import cv2
+import time
 from GPIO_HW_control.servo_motor import ServoMotor
 from GPIO_HW_control.ultrasonic_sensor import UltrasonicSensor
-from network.communication import Communication
+from Comm.communication import ClientCommunication
 
 
 class LaneController:
     """desc:
     
     """
-    def __init__(self, pin, port) -> None:
+    def __init__(self, pin, ip_address, port) -> None:
         """desc:
         
         """
@@ -24,35 +25,19 @@ class LaneController:
         self.camera = cv2.VideoCapture(0)
         # self.mic = ???
         # self.lcd = ???
-        self.comm = Communication(port)
+        self.comm = ClientCommunication(ip_address, port["PORT_IMAGE"])
         # self.model = ???
 
+    def __del__(self):
+        self.camera.release()
+
     def execute(self):
-        kick_trash = threading.Thread(target=self.servo_motor.control, args=())
-        
-        flag_detection = False
+        # kick_trash = threading.Thread(target=self.servo_motor.control, args=())
 
         while True:
             _, frame = self.camera.read()
             if frame is None:
                 continue
 
-            self.comm.send_image_to_server(frame)
-            
-            if self.ultra_sonic_sensor.control() < 8:
-                flag_detection = True
-            else:
-                if flag_detection == True:
-                    # TODO: 추론 실시 스레드 start()
-
-
-                    flag_detection = False
-                
-                
-
-
-
-    def sensing_distance(self):
-
-
-
+            self.comm.send_frame(frame)
+            time.sleep(1/30)
