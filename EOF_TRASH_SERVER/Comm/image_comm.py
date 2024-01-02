@@ -1,23 +1,43 @@
-from communication import Communication
+import cv2
+import socket
+import numpy as np
+import struct
+from Comm.communication import Communication
 
 class Image_comm(Communication):
-    def __init__(self) -> None:
-        # TODO: 이미지 통신과 관련된 포트 설정
-        # TODO: 소켓 생성 및 초기화
+    def __init__(self, ip_address, port, frame_queue) -> None:
+        """ ip_address 는 서버의 ip address 입니다.
+            port 번호는 socket 에 할당할 unique 한 번호로
+            클라이언트와 서버가 같은 port 번호를 사용해야 합니다.
+        """        
+        self.ip_address = ip_address
+        self.port = port
+        self.frame_queue = frame_queue
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.bind((self.ip_address, self.port))
+        self.socket.listen(1)
+    
+    def __del__(self):
+        self.socket.close()
     
     def receive(self):
-        # TODO: 이미지를 수신 및 저장(?)
+        print(f'Serving on {self.ip_address}:{self.port}')
+
+        client_socket, addr = self.socket.accept()
+        print(f'Connection from {addr}')
         
-        # return 이미지 파일 패스
-        
-    def __store_image(self, data):
-        # TODO: data 를 jpg 포맷으로 변환 후 저장
-        
-        # 최대 100 장 까지만 저장될 수 있도록 한다.
-        # filename_000.jpg 형태로 저장 후
-        # filename_100.jpg 파일이 만들어지면
-        # 다시 filename_000.jpg 로 저장되도록
-        # count 변수(파일 이름의 숫자 부분)를
-        # circular 하게 조절한다.
-        
-        # return True if file is stored else False
+        while True:
+            # 이미지 데이터의 길이를 수신
+            img_len = struct.unpack("!I", client_socket.recv(4))[0]
+
+            # 이미지 데이터를 수신
+            img_data = b""
+            while len(img_data) < img_len:
+                chunk = client_socket.recv(min(img_len - len(img_data), 4096))
+                if not chunk:
+                    break
+                img_data += chunk
+
+            # 바이트로 된 이미지 데이터를 이미지 포맷으로 변환
+            img_np = cv2.imdecode(np.frombuffer(img_data, dtype=np.uint8), 1)
+            self.frame_queue.put(img_np)
