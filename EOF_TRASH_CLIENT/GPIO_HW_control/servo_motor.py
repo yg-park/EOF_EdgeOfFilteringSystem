@@ -25,6 +25,11 @@ class ServoMotor(HWInterface):
         """
         desc:
         """
+
+    def kick(self):
+        """
+        desc:
+        """
         self.set_servo_angle(90)
         time.sleep(1)
         self.set_servo_angle(0)

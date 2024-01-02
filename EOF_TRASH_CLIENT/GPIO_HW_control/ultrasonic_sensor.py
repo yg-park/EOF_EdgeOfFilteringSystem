@@ -7,6 +7,9 @@ from GPIO_HW_control.hw_interface import HWInterface
 
 
 class UltrasonicSensor(HWInterface):
+    """
+    
+    """
     def __init__(self, us_trig_pin, us_echo_pin):
         self.us_trig_pin = us_trig_pin
         self.us_echo_pin = us_echo_pin
@@ -20,6 +23,11 @@ class UltrasonicSensor(HWInterface):
         GPIO.cleanup(self.us_echo_pin)
 
     def control(self):
+        """
+        desc:
+        """
+
+    def mesure_distance(self):
         """desc:
 
         """
