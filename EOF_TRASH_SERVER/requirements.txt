@@ -2,8 +2,10 @@
 # (.gitignore에 EOF_THRASH_SERVER/.server_venv/*를 등록함)
 
 # python --verison 3.10.12
+# -U pip
 
 # 모델 추론에 필요한 라이브러리
+opencv-python==4.8.1.78
 openvino==2023.0.0
 openvino-model-api==0.1.8
 otx==1.4.4
