@@ -7,6 +7,8 @@ from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
 from PyQt_framework.rcv_img_thread import ReceiveImage
 from PyQt_framework.rcv_audio_thread import ReceiveAudio
+from Comm.string_comm import StringComm
+
 
 class MainGUI(QMainWindow):
     def __init__(self):
@@ -19,6 +21,8 @@ class MainGUI(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_pixmap)
         self.timer.start(60)  # 초당 60프레임
+        
+        self.SendString = StringComm()
         
         # Counter variable
         self.counter = 0
@@ -45,10 +49,10 @@ class MainGUI(QMainWindow):
         self.user_input_text_edit = QTextEdit(self)
         self.user_input_text_edit.setPlainText("User Input")
 
-        self.button1 = QPushButton('Button 1')
+        self.button1 = QPushButton('라인 시작')
         self.button1.clicked.connect(self.button1_clicked)  # Connect the button's clicked signal to the method
 
-        self.button2 = QPushButton('Button 2')
+        self.button2 = QPushButton('라인 정지')
         self.button2.clicked.connect(self.button2_clicked)  # Connect the button's clicked signal to the method
         
         main_vertical_layout = QVBoxLayout()
@@ -107,11 +111,13 @@ class MainGUI(QMainWindow):
     def button1_clicked(self):
         # Update UI when Button 1 is clicked
         self.counter += 1
+        self.SendString.send(message='2')#2는 RC 서보모터 동작
         self.user_input_text_edit.setPlainText(f"Button 1 pressed, Counter: {self.counter}")
     
     def button2_clicked(self):
         # Update UI when Button 1 is clicked
         self.counter += 1
+        self.SendString.send(message='3')#3은 RC 서보모터 정지
         self.user_input_text_edit.setPlainText(f"Button 2 pressed, Counter: {self.counter}")
 
     def update_texts(self, text1, text2):
