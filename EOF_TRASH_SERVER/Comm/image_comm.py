@@ -1,15 +1,22 @@
-import cv2
+"""
+ㅇ
+"""
 import socket
-import numpy as np
 import struct
+import cv2
+import numpy as np
 from Comm.communication import Communication
+
+
+
 
 class Image_comm(Communication):
     def __init__(self, ip_address, port, frame_queue) -> None:
         """ ip_address 는 서버의 ip address 입니다.
             port 번호는 socket 에 할당할 unique 한 번호로
             클라이언트와 서버가 같은 port 번호를 사용해야 합니다.
-        """        
+        """
+        super().__init__()
         self.ip_address = ip_address
         self.port = port
         self.frame_queue = frame_queue
@@ -22,7 +29,6 @@ class Image_comm(Communication):
     
     def receive(self):
         print(f'Serving on {self.ip_address}:{self.port}')
-
         client_socket, addr = self.socket.accept()
         print(f'Connection from {addr}')
         

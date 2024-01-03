@@ -1,21 +1,32 @@
-from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton
-from PyQt5.QtGui import QPixmap, QFont
-from PyQt5.QtCore import Qt
-# from io import BytesIO
+"""
+ㅇ
+"""
 import queue
-from multi_thread import Rcv_webcam_Thread
+from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton
+from PyQt5.QtGui import QPixmap, QFont, QImage
+from PyQt5.QtCore import Qt, QTimer
+from PyQt_framework.rcv_img_thread import ReceiveImage
 
-    
+
 class MainGUI(QMainWindow):
-    def __init__(self):
+    def __init__(self, ip_address, port):
         super().__init__()
-        self.frame_queue = queue.Queue()
-        self.initUI()
-        self.start_multi_thread()
+        self.ip_address = ip_address
+        self.port = port
+        self.init_UI()  # 기본 UI틀을 생성합니다.
+        self.frame_queue = queue.Queue()  # 동영상 스트리밍용 queue를 생성합니다.
+        self.start_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
+        
+        # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_pixmap)
+        self.timer.start(30)  # 초당 30프레임
+        
         # Counter variable
         self.counter = 0
 
-    def initUI(self):
+    def init_UI(self):
+        """기본 UI틀을 생성합니다."""
         self.setWindowTitle("EOF Trash - Server")
 
         self.central_widget = QWidget()
@@ -61,22 +72,31 @@ class MainGUI(QMainWindow):
 
         self.layout.addLayout(main_vertical_layout)
 
-    def start_multi_thread(self):
-        #스레드 1 시작
-        self.webcam_Thread = Rcv_webcam_Thread()
-        self.webcam_Thread.new_frame.connect(self.update_image)
-        self.webcam_Thread.start()
+    def start_threads(self):
+        """프로그램 동작에 필요한 스레드들을 실행합니다"""
+        # 클라이언트로부터 영상을 송신받는 스레드
+        self.video_stream_thread = ReceiveImage(
+            frame_queue=self.frame_queue,
+            ip_address=self.ip_address,
+            port=self.port["IMG_PORT"]
+        )
+        self.video_stream_thread.start()
         
+    def update_pixmap(self):
+        """"""
+        if not self.frame_queue.empty():
+            image_data = self.frame_queue.get()
 
-    def update_image(self, current_frame):
-        # QLabel을 새 이미지로 업데이트
-        pixmap = QPixmap.fromImage(current_frame)
-        if not pixmap.isNull():
-            self.image_label.setPixmap(pixmap)
-        else:
-            print("Invalid image data.2")
-
-
+            # 서버에서 수신한 이미지 numpy array를 QImage로 변환
+            height, width, channels = image_data.shape
+            bytes_per_line = channels * width
+            q_image = QImage(image_data.data, width, height, bytes_per_line, QImage.Format_BGR888)
+            
+            if not q_image.isNull():
+                pixmap = QPixmap.fromImage(q_image)
+                self.image_label.setPixmap(pixmap)
+            else:
+                print("Invalid image data.1")
 
     def update_text_edit(self, message):
         main_layout = self.layout.itemAt(0)
