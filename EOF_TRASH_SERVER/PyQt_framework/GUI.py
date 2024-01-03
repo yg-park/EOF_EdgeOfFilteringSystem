@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayo
 from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
 from PyQt_framework.rcv_img_thread import ReceiveImage
-
+from PyQt_framework.rcv_audio_thread import ReceiveAudio
 
 class MainGUI(QMainWindow):
     def __init__(self):
@@ -18,7 +18,7 @@ class MainGUI(QMainWindow):
         # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_pixmap)
-        self.timer.start(30)  # 초당 30프레임
+        self.timer.start(60)  # 초당 60프레임
         
         # Counter variable
         self.counter = 0
@@ -75,6 +75,9 @@ class MainGUI(QMainWindow):
         # 클라이언트로부터 영상을 송신받는 스레드
         self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
+        self.audio_recv_thread = ReceiveAudio()
+        self.audio_recv_thread.start()
+        
         
     def update_pixmap(self):
         """"""
@@ -116,6 +119,8 @@ class MainGUI(QMainWindow):
 
     def closeEvent(self, event):
         # 어플리케이션이 종료될 때 스레드를 정리
-        self.webcam_Thread.quit()
-        self.webcam_Thread.wait()
+        self.video_stream_thread.quit()
+        self.video_stream_thread.wait()
+        self.audio_recv_thread.quit()
+        self.audio_recv_thread.wait()
         event.accept()
