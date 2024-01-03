@@ -9,10 +9,8 @@ from PyQt_framework.rcv_img_thread import ReceiveImage
 
 
 class MainGUI(QMainWindow):
-    def __init__(self, ip_address, port):
+    def __init__(self):
         super().__init__()
-        self.ip_address = ip_address
-        self.port = port
         self.init_UI()  # 기본 UI틀을 생성합니다.
         self.frame_queue = queue.Queue()  # 동영상 스트리밍용 queue를 생성합니다.
         self.start_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
@@ -75,11 +73,7 @@ class MainGUI(QMainWindow):
     def start_threads(self):
         """프로그램 동작에 필요한 스레드들을 실행합니다"""
         # 클라이언트로부터 영상을 송신받는 스레드
-        self.video_stream_thread = ReceiveImage(
-            frame_queue=self.frame_queue,
-            ip_address=self.ip_address,
-            port=self.port["IMG_PORT"]
-        )
+        self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
         
     def update_pixmap(self):

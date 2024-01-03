@@ -1,37 +1,42 @@
 """
-ㅇ
+이 파일은 이미지 통신을 위한 모듈 입니다.
 """
 import socket
 import struct
 import cv2
 import numpy as np
-from Comm.communication import Communication
+
+IP_ADDRESS = "10.10.15.58"
+IMG_PORT = 5555
 
 
+class ImageComm():
+    """_summary_
 
-
-class Image_comm(Communication):
-    def __init__(self, ip_address, port, frame_queue) -> None:
+    Args:
+        Communication (_type_): _description_
+    """
+    def __init__(self) -> None:
         """ ip_address 는 서버의 ip address 입니다.
             port 번호는 socket 에 할당할 unique 한 번호로
             클라이언트와 서버가 같은 port 번호를 사용해야 합니다.
         """
-        super().__init__()
-        self.ip_address = ip_address
-        self.port = port
-        self.frame_queue = frame_queue
+        self.ip_address = IP_ADDRESS
+        self.port = IMG_PORT
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.ip_address, self.port))
         self.socket.listen(1)
-    
+
     def __del__(self):
         self.socket.close()
-    
-    def receive(self):
+
+    def receive(self, frame_queue):
+        """ 이 함수는 부모 클래스로부터 재정의 된 함수입니다.
+        """
         print(f'Serving on {self.ip_address}:{self.port}')
         client_socket, addr = self.socket.accept()
         print(f'Connection from {addr}')
-        
+
         while True:
             # 이미지 데이터의 길이를 수신
             img_len = struct.unpack("!I", client_socket.recv(4))[0]
@@ -46,4 +51,4 @@ class Image_comm(Communication):
 
             # 바이트로 된 이미지 데이터를 이미지 포맷으로 변환
             img_np = cv2.imdecode(np.frombuffer(img_data, dtype=np.uint8), 1)
-            self.frame_queue.put(img_np)
+            frame_queue.put(img_np)
