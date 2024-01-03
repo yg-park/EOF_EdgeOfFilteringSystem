@@ -7,13 +7,10 @@ from Comm.image_comm import Image_comm
 
 class ReceiveImage(QThread):
     """ㅇ"""
-    def __init__(self, frame_queue, ip_address, port):
+    def __init__(self, frame_queue):
         super().__init__()
-        self.MyReceiveImage = Image_comm(
-            ip_address=ip_address,
-            port=port,
-            frame_queue=frame_queue
-        )
+        self.MyReceiveImage = Image_comm()
+        self.frame_queue = frame_queue
 
     def run(self):
-        self.MyReceiveImage.receive()
+        self.MyReceiveImage.receive(self.frame_queue)
