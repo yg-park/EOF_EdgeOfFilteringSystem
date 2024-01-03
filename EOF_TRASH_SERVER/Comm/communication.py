@@ -1,21 +1,6 @@
 """
-d
+이 파일은 통신을 위한 모듈 입니다.
 """
-from abc import ABC, abstractmethod
 
-
-class Communication(ABC):
-    """
-    d
-    """
-    def __init__(self):
-        self.ip_address = "10.10.15.58"
-        self.img_port = 5555
-        self.str_port = 6666
-        self.wav_port = 7777
-        self.tmp_port = 8888
-    
-    @abstractmethod
-    def receive(self):
-        """d"""
-        pass
+IP_ADDRESS = "10.10.15.58"
+PORT = {'IMG_PORT': 5555, 'STR_PORT': 6666, 'WAV_PORT': 7777, 'TMP_PORT': 8888}
