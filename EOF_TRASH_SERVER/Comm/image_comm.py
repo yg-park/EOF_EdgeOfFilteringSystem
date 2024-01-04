@@ -11,16 +11,8 @@ IMG_PORT = 5555
 
 
 class ImageComm():
-    """_summary_
-
-    Args:
-        Communication (_type_): _description_
-    """
-    def __init__(self) -> None:
-        """ ip_address 는 서버의 ip address 입니다.
-            port 번호는 socket 에 할당할 unique 한 번호로
-            클라이언트와 서버가 같은 port 번호를 사용해야 합니다.
-        """
+    """이미지를 통신하기 위한 클래스입니다."""
+    def __init__(self):
         self.ip_address = IP_ADDRESS
         self.port = IMG_PORT
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,8 +22,10 @@ class ImageComm():
     def __del__(self):
         self.socket.close()
 
-    def receive(self, frame_queue):
-        """ 이 함수는 부모 클래스로부터 재정의 된 함수입니다.
+    def receive(self, frame_queue) -> None:
+        """이미지를 수신 받는 함수입니다. 수신받은 이미지를 큐에 삽입합니다.
+        
+        : param1(frame_queue) - 이미지를 저장할 큐 입니다.
         """
         print(f'Serving on {self.ip_address}:{self.port}')
         client_socket, addr = self.socket.accept()

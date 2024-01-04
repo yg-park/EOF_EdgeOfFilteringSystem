@@ -66,17 +66,17 @@ class PetBottleDetector:
         item = predicted_validation_dataset[0]
         return item.get_annotations(), elapsed_time
 
-    def detect_pet_bottle(self, frame):
-        """영상 frame에서 페트병 object들을 detect하고,
-        frame의 중앙선을 지나는 페트병 object box가 있으면, "True"와 "페트병 영역이 crop된 이미지"를 리턴한다.
-        그 외의 모든 경우에는 "False"와 "None"을 리턴한다.
+    def detect_pet_bottle(self, frame) -> tuple:
+        """ 영상 frame에서 페트병 object들을 detect하고,
+            frame의 중앙선을 지나는 페트병 object box가 있으면, "True"와 "페트병 영역이 crop된 이미지"를 리턴한다.
+            그 외의 모든 경우에는 "False"와 "None"을 리턴한다.
 
-        사용 예)
-        cap = cv2.VideoCapture(0)
-        ret, frame = cap.read()
+            사용 예)
+            cap = cv2.VideoCapture(0)
+            ret, frame = cap.read()
 
-        petDetector = PetBottleDetector()
-        ret, frame = petDetector.detect_pet_bottle(frame)
+            petDetector = PetBottleDetector()
+            ret, frame = petDetector.detect_pet_bottle(frame)
         """
         frame_height = frame.shape[0]
         frame_width = frame.shape[1]
