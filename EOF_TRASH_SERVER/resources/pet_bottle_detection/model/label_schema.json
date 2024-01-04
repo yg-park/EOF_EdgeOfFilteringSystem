@@ -7,7 +7,7 @@
     },
     "label_groups": [
         {
-            "_id": "658ff6e022a27977a1204930",
+            "_id": "65963ead46b75856433596ad",
             "name": "labels",
             "label_ids": [
                 "0"
@@ -18,16 +18,16 @@
     "all_labels": {
         "0": {
             "_id": "0",
-            "name": "pet",
+            "name": "pet_bottle",
             "color": {
-                "red": 65,
-                "green": 188,
-                "blue": 236,
+                "red": 90,
+                "green": 110,
+                "blue": 98,
                 "alpha": 255
             },
             "hotkey": "",
             "domain": "DETECTION",
-            "creation_date": "2023-12-30T10:54:24.018000",
+            "creation_date": "2024-01-04T05:14:21.598000",
             "is_empty": false,
             "is_anomalous": false
         }

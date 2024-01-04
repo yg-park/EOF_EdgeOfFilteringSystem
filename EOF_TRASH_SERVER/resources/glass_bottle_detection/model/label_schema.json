@@ -1,0 +1,35 @@
+{
+    "label_tree": {
+        "type": "tree",
+        "directed": true,
+        "nodes": [],
+        "edges": []
+    },
+    "label_groups": [
+        {
+            "_id": "659648a0f88f5d9a0dc8cdb4",
+            "name": "labels",
+            "label_ids": [
+                "0"
+            ],
+            "relation_type": "EXCLUSIVE"
+        }
+    ],
+    "all_labels": {
+        "0": {
+            "_id": "0",
+            "name": "glass_bottle",
+            "color": {
+                "red": 78,
+                "green": 30,
+                "blue": 206,
+                "alpha": 255
+            },
+            "hotkey": "",
+            "domain": "DETECTION",
+            "creation_date": "2024-01-04T05:56:48.621000",
+            "is_empty": false,
+            "is_anomalous": false
+        }
+    }
+}

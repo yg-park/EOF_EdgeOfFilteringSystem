@@ -10,7 +10,7 @@
     },
     "label_groups": [
         {
-            "_id": "6588f993aaf2771374aa7bb6",
+            "_id": "65963e391d7e9ea25c70a661",
             "name": "labels",
             "label_ids": [
                 "0",
@@ -22,31 +22,31 @@
     "all_labels": {
         "0": {
             "_id": "0",
-            "name": "clear_bottle",
+            "name": "ClearPetBottle",
             "color": {
-                "red": 189,
-                "green": 187,
-                "blue": 10,
+                "red": 29,
+                "green": 29,
+                "blue": 42,
                 "alpha": 255
             },
             "hotkey": "",
             "domain": "CLASSIFICATION",
-            "creation_date": "2023-12-25T03:40:03.436000",
+            "creation_date": "2024-01-04T05:12:25.019000",
             "is_empty": false,
             "is_anomalous": false
         },
         "1": {
             "_id": "1",
-            "name": "label_bottle",
+            "name": "LabelPetBottle",
             "color": {
-                "red": 163,
-                "green": 6,
-                "blue": 224,
+                "red": 63,
+                "green": 108,
+                "blue": 193,
                 "alpha": 255
             },
             "hotkey": "",
             "domain": "CLASSIFICATION",
-            "creation_date": "2023-12-25T03:40:03.436000",
+            "creation_date": "2024-01-04T05:12:25.019000",
             "is_empty": false,
             "is_anomalous": false
         }

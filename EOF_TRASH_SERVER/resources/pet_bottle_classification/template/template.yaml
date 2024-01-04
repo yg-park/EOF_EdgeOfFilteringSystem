@@ -1,9 +1,9 @@
-model_template_id: Custom_Image_Classification_MobileNet-V3-large-1x
-name: MobileNet-V3-large-1x
+model_template_id: Custom_Image_Classification_EfficientNet-V2-S
+name: EfficientNet-V2-S
 task_type: CLASSIFICATION
 task_family: VISION
 instantiation: CLASS
-summary: Class-Incremental Image Classification for MobileNet-V3-large-1x
+summary: Class-Incremental Image Classification for EfficientNet-V2-S
 application: null
 framework: OTXClassification v1.2.3
 entrypoints:
@@ -20,10 +20,10 @@ hyper_parameters:
         default_value: 64
         auto_hpo_state: POSSIBLE
       learning_rate:
-        default_value: 0.0058
+        default_value: 0.0071
         auto_hpo_state: POSSIBLE
       learning_rate_warmup_iters:
-        default_value: 10
+        default_value: 0
       num_iters:
         default_value: 90
     nncf_optimization:
@@ -32,7 +32,7 @@ hyper_parameters:
       enable_pruning:
         default_value: false
       pruning_supported:
-        default_value: true
+        default_value: false
       maximal_accuracy_degradation:
         default_value: 1.0
     algo_backend:
@@ -42,6 +42,6 @@ max_nodes: 1
 training_targets:
 - GPU
 - CPU
-gigaflops: 0.44
-size: 4.29
-model_category: SPEED
+gigaflops: 5.76
+size: 20.23
+model_category: ACCURACY

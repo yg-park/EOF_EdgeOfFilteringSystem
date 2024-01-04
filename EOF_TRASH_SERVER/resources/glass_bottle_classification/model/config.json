@@ -1,0 +1,64 @@
+{
+    "type_of_model": "otx_classification",
+    "converter_type": "CLASSIFICATION",
+    "model_parameters": {
+        "multilabel": false,
+        "hierarchical": false,
+        "multihead_class_info": {},
+        "confidence_threshold": 0.5,
+        "labels": {
+            "label_tree": {
+                "type": "tree",
+                "directed": true,
+                "nodes": [
+                    "0",
+                    "1"
+                ],
+                "edges": []
+            },
+            "label_groups": [
+                {
+                    "_id": "6596127e8bc751ff8151f885",
+                    "name": "labels",
+                    "label_ids": [
+                        "0",
+                        "1"
+                    ],
+                    "relation_type": "EXCLUSIVE"
+                }
+            ],
+            "all_labels": {
+                "0": {
+                    "_id": "0",
+                    "name": "ClearGlassBottle",
+                    "color": {
+                        "red": 156,
+                        "green": 118,
+                        "blue": 242,
+                        "alpha": 255
+                    },
+                    "hotkey": "",
+                    "domain": "CLASSIFICATION",
+                    "creation_date": "2024-01-04T02:05:50.612000",
+                    "is_empty": false,
+                    "is_anomalous": false
+                },
+                "1": {
+                    "_id": "1",
+                    "name": "LidGlassBottle",
+                    "color": {
+                        "red": 40,
+                        "green": 75,
+                        "blue": 219,
+                        "alpha": 255
+                    },
+                    "hotkey": "",
+                    "domain": "CLASSIFICATION",
+                    "creation_date": "2024-01-04T02:05:50.612000",
+                    "is_empty": false,
+                    "is_anomalous": false
+                }
+            }
+        }
+    }
+}

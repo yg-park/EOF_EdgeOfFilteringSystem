@@ -1,9 +1,9 @@
 {
-    "type_of_model": "OTX_SSD",
+    "type_of_model": "SSD",
     "converter_type": "DETECTION",
     "model_parameters": {
         "result_based_confidence_threshold": true,
-        "confidence_threshold": 0.6499999761581421,
+        "confidence_threshold": 0.75,
         "max_num_detections": 0,
         "use_ellipse_shapes": false,
         "resize_type": "fit_to_window_letterbox",
@@ -17,7 +17,7 @@
             },
             "label_groups": [
                 {
-                    "_id": "658ff6e022a27977a1204930",
+                    "_id": "65963ead46b75856433596ad",
                     "name": "labels",
                     "label_ids": [
                         "0"
@@ -28,16 +28,16 @@
             "all_labels": {
                 "0": {
                     "_id": "0",
-                    "name": "pet",
+                    "name": "pet_bottle",
                     "color": {
-                        "red": 65,
-                        "green": 188,
-                        "blue": 236,
+                        "red": 90,
+                        "green": 110,
+                        "blue": 98,
                         "alpha": 255
                     },
                     "hotkey": "",
                     "domain": "DETECTION",
-                    "creation_date": "2023-12-30T10:54:24.018000",
+                    "creation_date": "2024-01-04T05:14:21.598000",
                     "is_empty": false,
                     "is_anomalous": false
                 }
@@ -53,7 +53,7 @@
         "tile_size": 400,
         "tile_overlap": 0.2,
         "tile_max_number": 1500,
-        "tile_ir_scale_factor": 2.0,
+        "tile_ir_scale_factor": 1.0,
         "tile_sampling_ratio": 1.0,
         "object_tile_ratio": 0.03,
         "header": "Tiling Parameters",
