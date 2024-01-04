@@ -1,18 +1,18 @@
 """
-ㅇ
+이미지 통신을 위한 스레드 모듈입니다.
 """
 from PyQt5.QtCore import QThread
 from Comm.image_comm import ImageComm
 
 
 class ReceiveImage(QThread):
-    """ㅇ"""
+    """이미지 통신을 위한 스레드 객체입니다."""
     def __init__(self, frame_queue):
         super().__init__()
 
-        self.comm_instance = ImageComm()
+        self.img_comm_instance = ImageComm()
         self.frame_queue = frame_queue
 
     def run(self):
-        self.comm_instance.receive(self.frame_queue)
-
+        """생성한 통신 객체를 통해 데이터를 수신합니다."""
+        self.img_comm_instance.receive(self.frame_queue)

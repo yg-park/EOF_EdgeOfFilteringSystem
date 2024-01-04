@@ -1,31 +1,29 @@
 """
-ㅇ
 """
 import queue
+import time
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton
 from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
 from PyQt_framework.rcv_img_thread import ReceiveImage
 from PyQt_framework.rcv_audio_thread import ReceiveAudio
-from Comm.string_comm import StringComm
+from EOF_TRASH_SERVER.Comm.hw_control_comm import HwControlComm
 
 
 class MainGUI(QMainWindow):
+    """메인 GUI에 관한 클래스입니다."""
     def __init__(self):
         super().__init__()
         self.init_UI()  # 기본 UI틀을 생성합니다.
         self.frame_queue = queue.Queue()  # 동영상 스트리밍용 queue를 생성합니다.
         self.start_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
-        
+
         # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_pixmap)
         self.timer.start(60)  # 초당 60프레임
-        
-        self.SendString = StringComm()
-        
-        # Counter variable
-        self.counter = 0
+
+        self.HW_control_comm = HwControlComm()
 
     def init_UI(self):
         """기본 UI틀을 생성합니다."""
@@ -50,11 +48,11 @@ class MainGUI(QMainWindow):
         self.user_input_text_edit.setPlainText("User Input")
 
         self.button1 = QPushButton('라인 시작')
-        self.button1.clicked.connect(self.button1_clicked)  # Connect the button's clicked signal to the method
+        self.button1.clicked.connect(self.operate_line)  # Connect the button's clicked signal to the method
 
         self.button2 = QPushButton('라인 정지')
-        self.button2.clicked.connect(self.button2_clicked)  # Connect the button's clicked signal to the method
-        
+        self.button2.clicked.connect(self.stop_line)  # Connect the button's clicked signal to the method
+
         main_vertical_layout = QVBoxLayout()
         sub_horizontal_layout = QHBoxLayout()
         sub_vertical_layout = QVBoxLayout()
@@ -75,16 +73,21 @@ class MainGUI(QMainWindow):
         self.layout.addLayout(main_vertical_layout)
 
     def start_threads(self):
-        """프로그램 동작에 필요한 스레드들을 실행합니다"""
-        # 클라이언트로부터 영상을 송신받는 스레드
+        """ 프로그램 동작에 필요한 스레드들을 실행합니다
+        
+            video_stream_thread는
+            클라이언트로부터 영상을 송신받는 스레드 입니다.
+            
+            audio_recv_thread는
+            클라이언트로부터 음성을 송신받는 스레드 입니다.
+        """
         self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
         self.audio_recv_thread = ReceiveAudio()
         self.audio_recv_thread.start()
-        
-        
+
     def update_pixmap(self):
-        """"""
+        """메인 GUI의 이미지를 업데이트 합니다."""
         if not self.frame_queue.empty():
             image_data = self.frame_queue.get()
 
@@ -92,7 +95,7 @@ class MainGUI(QMainWindow):
             height, width, channels = image_data.shape
             bytes_per_line = channels * width
             q_image = QImage(image_data.data, width, height, bytes_per_line, QImage.Format_BGR888)
-            
+
             if not q_image.isNull():
                 pixmap = QPixmap.fromImage(q_image)
                 self.image_label.setPixmap(pixmap)
@@ -100,6 +103,7 @@ class MainGUI(QMainWindow):
                 print("Invalid image data.1")
 
     def update_text_edit(self, message):
+        """메인 GUI의 텍스트박스를 업데이트 합니다."""
         main_layout = self.layout.itemAt(0)
         if main_layout:
             sub_layout = main_layout.itemAt(0)
@@ -108,17 +112,29 @@ class MainGUI(QMainWindow):
                 if text_edit_item and text_edit_item.widget():
                     text_edit_item.widget().append(message)
 
-    def button1_clicked(self):
-        # Update UI when Button 1 is clicked
-        self.counter += 1
-        self.SendString.send(message='2')#2는 RC 서보모터 동작
-        self.user_input_text_edit.setPlainText(f"Button 1 pressed, Counter: {self.counter}")
-    
-    def button2_clicked(self):
-        # Update UI when Button 1 is clicked
-        self.counter += 1
-        self.SendString.send(message='3')#3은 RC 서보모터 정지
-        self.user_input_text_edit.setPlainText(f"Button 2 pressed, Counter: {self.counter}")
+    def operate_line(self):
+        """라인을 가동합니다."""
+        self.HW_control_comm.send(message='RC operate')
+        
+        current_time = time.localtime()
+
+        hour = current_time.tm_hour
+        minute = current_time.tm_min
+        second = current_time.tm_sec
+        
+        self.user_input_text_edit.setPlainText(f"라인을 가동합니다. {hour}시 {minute}분 {second}초")
+
+    def stop_line(self):
+        """라인을 중지합니다."""
+        self.HW_control_comm.send(message='RC stop')
+        
+        current_time = time.localtime()
+
+        hour = current_time.tm_hour
+        minute = current_time.tm_min
+        second = current_time.tm_sec
+        
+        self.user_input_text_edit.setPlainText(f"라인을 가동합니다. {hour}시 {minute}분 {second}초")
 
     def update_texts(self, text1, text2):
         pass  # No update for this example
