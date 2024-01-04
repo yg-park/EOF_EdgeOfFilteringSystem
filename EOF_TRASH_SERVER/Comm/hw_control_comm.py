@@ -11,16 +11,16 @@ class HwControlComm():
     """하드웨어를 제어하기 위한 통신 클래스입니다."""
     def __init__(self):
         self.ip_address = IP_ADDRESS
-        self.port = STRING_SEND_PORT
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((self.ip_address, self.port))
+        self.port = STRING_SEND_PORT        
 
-    def __del__(self):
-        self.client_socket.close()
+    # def __del__(self):
 
-    def send(self, order) -> None:
+    def send(self, message) -> None:
         """ 하드웨어를 제어할 명령을 보냅니다.
         
         :param1(order) - 하드웨어로 보낼 명령입니다.
         """
-        self.client_socket.sendall(order.encode('utf-8'))
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((self.ip_address, self.port))
+        client_socket.sendall(message.encode('utf-8'))
+        client_socket.close()

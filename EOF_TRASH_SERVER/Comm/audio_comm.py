@@ -28,12 +28,11 @@ class AudioComm():
 
         file_path = Path('resources/received_audio.wav')
 
-        while True:
-            # 오디오 파일 수신
-            with open(file_path, 'wb') as file:
-                while True:
-                    data = client_socket.recv(1024)
-                    if not data:
-                        break
-                    file.write(data)
-            print("File received successfully.")
+        # 오디오 파일 수신
+        with open(file_path, 'wb') as file:
+            while True:
+                data = client_socket.recv(1024)
+                if not data:
+                    break
+                file.write(data)
+        print("File received successfully.")
