@@ -1,13 +1,13 @@
 """
-영상 프레임 속 페트병의 비닐라벨 부착여부를 판별하는 모듈입니다.
+영상 프레임 속 유리병의 철뚜껑 부착여부를 판별하는 모듈입니다.
 """
 from Inference.otx_api import OTXAPI
 
 
-class PetBottleClassifier(OTXAPI):
-    """OTX API를 통해 페트병 라벨 부착여부 classification을 수행하는 클래스"""
-    model_template_path = "resources/pet_bottle_classification/template"
-    model_weight_path = "resources/pet_bottle_classification/model/model.xml"
+class GlassBottleClassifier(OTXAPI):
+    """OTX API를 통해 유리병 철뚜껑 부착여부 classification을 수행하는 클래스"""
+    model_template_path = "resources/glass_bottle_classification/template"
+    model_weight_path = "resources/glass_bottle_classification/model/model.xml"
     model_name = "Custom_Image_Classification_EfficientNet-V2-S"
 
     def classify_pet_bottle(self, frame) -> int:

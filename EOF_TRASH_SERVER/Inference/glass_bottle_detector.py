@@ -1,14 +1,14 @@
 """
-영상 프레임에서 페트병을 찾는 모듈입니다.
+영상 프레임에서 유리병을 찾는 모듈입니다.
 """
 from Inference.otx_api import OTXAPI
 
 
-class PetBottleDetector(OTXAPI):
-    """OTX API를 통해 페트병 object detection을 수행하는 클래스"""
-    model_template_path = "resources/pet_bottle_detection/template"
-    model_weight_path = "resources/pet_bottle_detection/model/model.xml"
-    model_name = "Custom_Object_Detection_YOLOX"
+class GlassBottleDetector(OTXAPI):
+    """OTX API를 통해 유리병 object detection을 수행하는 클래스"""
+    model_template_path = "resources/glass_bottle_detection/template"
+    model_weight_path = "resources/glass_bottle_detection/model/model.xml"
+    model_name = "Custom_Object_Detection_Gen3_ATSS"
 
     def detect_pet_bottle(self, frame) -> tuple:
         """ 영상 frame에서 페트병 object들을 detect하고,
