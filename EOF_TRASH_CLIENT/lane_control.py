@@ -6,6 +6,7 @@ import time
 import cv2
 from GPIO_HW_control.rc_servo_motor import RCServoMotor
 from GPIO_HW_control.servo_motor import ServoMotor
+from GPIO_HW_control.button import Button
 from Comm.communication import ClientCommunication
 from Comm.send_audio import AudioCommunication
 from Comm.rcv_string import StringComm
@@ -22,6 +23,7 @@ class LaneController:
         self.rc_servo_motor = RCServoMotor(pin["RC_SERVO_1"], pin["RC_SERVO_2"])
         self.servo_motor = ServoMotor(pin["SERVO"])
         self.rcv_str_comm = StringComm()
+        self.button_controller = Button()
         self.camera = cv2.VideoCapture(0)
         self.ip_address = ip_address
         self.port = port
@@ -64,6 +66,8 @@ class LaneController:
         서보모터(1)/rc서보모터 on(2) off(3)
         """
         while True:
+            if self.button_controller.sensingBTN() is False:
+                self.voice_thread.start()
             if self.rcv_str_comm.msg == 1:
                 self.servo_thread.start()
                 self.rcv_str_comm.msg = 0
@@ -78,7 +82,6 @@ class LaneController:
         try:
             self.webcam_thread.start()
             self.HW_thread.start()
-            self.voice_thread.start()
             self.listen_str_thread.start()
         finally:
             self.webcam_thread.join()
