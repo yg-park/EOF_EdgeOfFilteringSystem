@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayo
 from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
 from PyQt_framework.rcv_img_thread import ReceiveImage
+from PyQt_framework.rcv_audio_thread import ReceiveAudio
+from Comm.string_comm import StringComm
 
 
 class MainGUI(QMainWindow):
@@ -18,7 +20,9 @@ class MainGUI(QMainWindow):
         # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_pixmap)
-        self.timer.start(30)  # 초당 30프레임
+        self.timer.start(60)  # 초당 60프레임
+        
+        self.SendString = StringComm()
         
         # Counter variable
         self.counter = 0
@@ -45,10 +49,10 @@ class MainGUI(QMainWindow):
         self.user_input_text_edit = QTextEdit(self)
         self.user_input_text_edit.setPlainText("User Input")
 
-        self.button1 = QPushButton('Button 1')
+        self.button1 = QPushButton('라인 시작')
         self.button1.clicked.connect(self.button1_clicked)  # Connect the button's clicked signal to the method
 
-        self.button2 = QPushButton('Button 2')
+        self.button2 = QPushButton('라인 정지')
         self.button2.clicked.connect(self.button2_clicked)  # Connect the button's clicked signal to the method
         
         main_vertical_layout = QVBoxLayout()
@@ -75,6 +79,9 @@ class MainGUI(QMainWindow):
         # 클라이언트로부터 영상을 송신받는 스레드
         self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
+        self.audio_recv_thread = ReceiveAudio()
+        self.audio_recv_thread.start()
+        
         
     def update_pixmap(self):
         """"""
@@ -104,11 +111,13 @@ class MainGUI(QMainWindow):
     def button1_clicked(self):
         # Update UI when Button 1 is clicked
         self.counter += 1
+        self.SendString.send(message='2')#2는 RC 서보모터 동작
         self.user_input_text_edit.setPlainText(f"Button 1 pressed, Counter: {self.counter}")
     
     def button2_clicked(self):
         # Update UI when Button 1 is clicked
         self.counter += 1
+        self.SendString.send(message='3')#3은 RC 서보모터 정지
         self.user_input_text_edit.setPlainText(f"Button 2 pressed, Counter: {self.counter}")
 
     def update_texts(self, text1, text2):
@@ -116,6 +125,8 @@ class MainGUI(QMainWindow):
 
     def closeEvent(self, event):
         # 어플리케이션이 종료될 때 스레드를 정리
-        self.webcam_Thread.quit()
-        self.webcam_Thread.wait()
+        self.video_stream_thread.quit()
+        self.video_stream_thread.wait()
+        self.audio_recv_thread.quit()
+        self.audio_recv_thread.wait()
         event.accept()
