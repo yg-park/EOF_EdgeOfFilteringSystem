@@ -1,0 +1,73 @@
+{
+    "type_of_model": "SSD",
+    "converter_type": "DETECTION",
+    "model_parameters": {
+        "result_based_confidence_threshold": true,
+        "confidence_threshold": 0.30000001192092896,
+        "max_num_detections": 0,
+        "use_ellipse_shapes": false,
+        "labels": {
+            "label_tree": {
+                "type": "tree",
+                "directed": true,
+                "nodes": [],
+                "edges": []
+            },
+            "label_groups": [
+                {
+                    "_id": "659648a0f88f5d9a0dc8cdb4",
+                    "name": "labels",
+                    "label_ids": [
+                        "0"
+                    ],
+                    "relation_type": "EXCLUSIVE"
+                }
+            ],
+            "all_labels": {
+                "0": {
+                    "_id": "0",
+                    "name": "glass_bottle",
+                    "color": {
+                        "red": 78,
+                        "green": 30,
+                        "blue": 206,
+                        "alpha": 255
+                    },
+                    "hotkey": "",
+                    "domain": "DETECTION",
+                    "creation_date": "2024-01-04T05:56:48.621000",
+                    "is_empty": false,
+                    "is_anomalous": false
+                }
+            }
+        }
+    },
+    "tiling_parameters": {
+        "visible_in_ui": true,
+        "type": "PARAMETER_GROUP",
+        "enable_tiling": false,
+        "enable_tile_classifier": false,
+        "enable_adaptive_params": true,
+        "tile_size": 400,
+        "tile_overlap": 0.2,
+        "tile_max_number": 1500,
+        "tile_ir_scale_factor": 1.0,
+        "tile_sampling_ratio": 1.0,
+        "object_tile_ratio": 0.03,
+        "header": "Tiling Parameters",
+        "description": "Tiling Parameters",
+        "_ParameterGroup__metadata_overrides": {},
+        "groups": [],
+        "parameters": [
+            "enable_adaptive_params",
+            "enable_tile_classifier",
+            "enable_tiling",
+            "object_tile_ratio",
+            "tile_ir_scale_factor",
+            "tile_max_number",
+            "tile_overlap",
+            "tile_sampling_ratio",
+            "tile_size"
+        ]
+    }
+}

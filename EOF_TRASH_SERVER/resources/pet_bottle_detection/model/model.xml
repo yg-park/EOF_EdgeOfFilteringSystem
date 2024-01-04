@@ -16973,10 +16973,10 @@
 		</conversion_parameters>
 		<legacy_frontend value="False" />
 		<model_info>
-			<confidence_threshold value="0.65" />
+			<confidence_threshold value="0.7500000000000001" />
 			<iou_threshold value="0.5" />
 			<label_ids value="0" />
-			<labels value="pet" />
+			<labels value="pet_bottle" />
 			<model_type value="ssd" />
 			<task_type value="detection" />
 		</model_info>
