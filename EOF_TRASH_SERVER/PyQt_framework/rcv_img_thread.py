@@ -2,15 +2,17 @@
 ㅇ
 """
 from PyQt5.QtCore import QThread
-from Comm.image_comm import Image_comm
+from Comm.image_comm import ImageComm
 
 
 class ReceiveImage(QThread):
     """ㅇ"""
     def __init__(self, frame_queue):
         super().__init__()
-        self.MyReceiveImage = Image_comm()
+
+        self.comm_instance = ImageComm()
         self.frame_queue = frame_queue
 
     def run(self):
-        self.MyReceiveImage.receive(self.frame_queue)
+        self.comm_instance.receive(self.frame_queue)
+
