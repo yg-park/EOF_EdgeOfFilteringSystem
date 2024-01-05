@@ -2,7 +2,7 @@
 
 ## 240104
 ### backbone
-Custom_Image_classification_MobileNet-V3-large-V2-S (otx 제공 pretrained model)
+Custom_Image_Classification_EfficientNet-V2-S (otx 제공 pretrained model)
 ### data
 ### data
 - 1062장의 데이터
