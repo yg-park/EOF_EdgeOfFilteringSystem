@@ -6,13 +6,14 @@ import time
 import cv2
 from GPIO_HW_control.rc_servo_motor import RCServoMotor
 from GPIO_HW_control.servo_motor import ServoMotor
-from Communication.send_image import ImageCommunication
-from Communication.send_audio import AudioCommunication
-from Communication.rcv_control_order import HWControlCommunication
+from GPIO_HW_control.button import Button
+from Communication.image_communication import ImageCommunication
+from Communication.audio_communication import AudioCommunication
+from Communication.hw_control_communication import HWControlCommunication
 from Audio.voice_record import AudioRecorder
 
 
-class LineController:
+class LaneController:
     """라인을 제어하기 위한 클래스입니다."""
     def __init__(self):
         self._init_comm()
@@ -29,6 +30,7 @@ class LineController:
     
     def _init_hw(self):
         self.rc_servo_motor = RCServoMotor()
+        self.button_controller = Button()
         self.servo_motor = ServoMotor()
         self.camera = cv2.VideoCapture(0)
 
@@ -59,15 +61,17 @@ class LineController:
     def hw_control(self):
         """서버로부터 HW를 제어하는 통신을 받아 HW를 제어합니다."""
         while True:
-            if self.listen_hw_control_thread.msg == "Servo Kick":
+            if self.button_controller.sensingBTN() is False:
+                self.voice_thread.start()
+            if self.hw_control_comm.msg == "Servo Kick":
                 self.servo_thread.start()
-                self.listen_hw_control_thread.msg = ""
-            elif self.listen_hw_control_thread.msg == "RC Start":
-                self.rc_servo_motor.operate()
-                self.listen_hw_control_thread.msg = ""
-            elif self.listen_hw_control_thread.msg == "RC Stop":
+                self.hw_control_comm.msg = ""
+            elif self.hw_control_comm.msg == "RC Start":
+                self.rc_servo_motor.start()
+                self.hw_control_comm.msg = ""
+            elif self.hw_control_comm.msg == "RC Stop":
                 self.rc_servo_motor.stop()
-                self.listen_hw_control_thread.msg = ""
+                self.hw_control_comm.msg = ""
 
     def execute(self):
         """스레드를 실행시킵니다."""

@@ -22,7 +22,7 @@ class RCServoMotor:
         GPIO.cleanup(self.rc_servo_1_pin)
         GPIO.cleanup(self.rc_servo_2_pin)
 
-    def operate(self):
+    def start(self):
         """레인을 동작시킵니다."""
         GPIO.output(self.rc_servo_1_pin, GPIO.HIGH)
         GPIO.output(self.rc_servo_2_pin, GPIO.HIGH)

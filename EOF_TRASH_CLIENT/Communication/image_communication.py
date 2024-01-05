@@ -6,7 +6,7 @@ import socket
 import struct
 
 IP_ADDRESS = "10.10.15.58"
-PORT = 8888
+PORT = 5555
 
 
 class ImageCommunication:
