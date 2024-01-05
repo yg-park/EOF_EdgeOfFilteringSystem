@@ -1,32 +1,28 @@
 """
-rc servo motor control in raspberry pi 4
+RC Servo Motor 를 제어하는 모듈입니다.
 """
 import RPi.GPIO as GPIO
-from GPIO_HW_control.hw_interface import HWInterface
-#GPIO.setwarnings(False)
+# GPIO.setwarnings(False)
 
-class RCServoMotor(HWInterface):
-    """
-    desc:
-    """
-    def __init__(self, rc_servo_1_pin, rc_servo_2_pin):
-        self.rc_servo_1_pin = rc_servo_1_pin
-        self.rc_servo_2_pin = rc_servo_2_pin
+RC_SERVO_PIN1 = 20
+RC_SERVO_PIN2 = 21
+
+
+class RCServoMotor:
+    """RC Servo Motor를 제어하기 위한 클래스입니다."""
+    def __init__(self):
+        self.rc_servo_1_pin = RC_SERVO_PIN1
+        self.rc_servo_2_pin = RC_SERVO_PIN2
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(rc_servo_1_pin, GPIO.OUT)
-        GPIO.setup(rc_servo_2_pin, GPIO.OUT)
+        GPIO.setup(self.rc_servo_1_pin, GPIO.OUT)
+        GPIO.setup(self.rc_servo_2_pin, GPIO.OUT)
         # self.stop()
 
     def __del__(self):
         GPIO.cleanup(self.rc_servo_1_pin)
         GPIO.cleanup(self.rc_servo_2_pin)
 
-    def control(self):
-        """
-        desc:
-        """
-        
-    def start(self):
+    def operate(self):
         """레인을 동작시킵니다."""
         GPIO.output(self.rc_servo_1_pin, GPIO.HIGH)
         GPIO.output(self.rc_servo_2_pin, GPIO.HIGH)
