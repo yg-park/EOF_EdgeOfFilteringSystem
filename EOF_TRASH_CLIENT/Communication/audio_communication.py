@@ -27,7 +27,7 @@ class AudioCommunication:
                 while data:
                     client_socket.send(data)
                     data = file.read(1024)
-
+            client_socket.close()
             print("File sent successfully.")
 
         except Exception as e:
