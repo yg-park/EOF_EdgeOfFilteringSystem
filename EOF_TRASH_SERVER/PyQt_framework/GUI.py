@@ -48,38 +48,36 @@ class MainGUI(QMainWindow):
         pixmap = QPixmap("resources/idle_frame.png")
         self.image_label.setPixmap(pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio))
 
-        self.small_text_label = QLabel("Small Centered Text", self)
-        self.small_text_label.setFont(QFont("Arial", 12))
+        self.line_start_btn = QPushButton('라인 시작')
+        self.line_start_btn.clicked.connect(self.operate_line)
 
-        self.text_edit = QTextEdit(self)
-        self.text_edit.setPlainText("Log")
+        self.line_stop_btn = QPushButton('라인 정지')
+        self.line_stop_btn.clicked.connect(self.stop_line)
 
         self.user_input_text_edit = QTextEdit(self)
-        self.user_input_text_edit.setPlainText("User Input")
+        self.user_input_text_edit.setPlainText("Log")
+        self.user_input_text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
-        self.button1 = QPushButton('라인 시작')
-        self.button1.clicked.connect(self.operate_line)  # Connect the button's clicked signal to the method
-
-        self.button2 = QPushButton('라인 정지')
-        self.button2.clicked.connect(self.stop_line)  # Connect the button's clicked signal to the method
+        self.user_input = QTextEdit(self)
+        self.user_input.setPlainText("User Input")
+        self.user_input.setMaximumHeight(30)
+        self.enter_clicked_btn = QPushButton('전송')
+        self.enter_clicked_btn.clicked.connect(self.enter_clicked)
 
         main_vertical_layout = QVBoxLayout()
-        sub_horizontal_layout = QHBoxLayout()
-        sub_vertical_layout = QVBoxLayout()
-        hor_sub_vertical_layout = QVBoxLayout()
+        sub_horizontal_layout_1 = QHBoxLayout()
+        sub_horizontal_layout_2 = QHBoxLayout()
 
-        sub_vertical_layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
-        sub_vertical_layout.addWidget(self.small_text_label, alignment=Qt.AlignCenter)
+        sub_horizontal_layout_1.addWidget(self.line_start_btn)
+        sub_horizontal_layout_1.addWidget(self.line_stop_btn)
 
-        hor_sub_vertical_layout.addWidget(self.user_input_text_edit)
-        hor_sub_vertical_layout.addWidget(self.button1)
-        hor_sub_vertical_layout.addWidget(self.button2)
+        sub_horizontal_layout_2.addWidget(self.user_input)
+        sub_horizontal_layout_2.addWidget(self.enter_clicked_btn)
 
-        sub_horizontal_layout.addLayout(sub_vertical_layout)
-        sub_horizontal_layout.addLayout(hor_sub_vertical_layout)
-        main_vertical_layout.addLayout(sub_horizontal_layout)
-        main_vertical_layout.addWidget(self.text_edit)
-
+        main_vertical_layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
+        main_vertical_layout.addLayout(sub_horizontal_layout_1)
+        main_vertical_layout.addWidget(self.user_input_text_edit)
+        main_vertical_layout.addLayout(sub_horizontal_layout_2)
         self.layout.addLayout(main_vertical_layout)
 
     def start_threads(self):
@@ -169,6 +167,12 @@ class MainGUI(QMainWindow):
         second = current_time.tm_sec
         
         self.user_input_text_edit.setPlainText(f"라인을 가동합니다. {hour}시 {minute}분 {second}초")
+
+    def enter_clicked(self):
+        entered_text = self.user_input.toPlainText()
+        current_text = self.user_input_text_edit.toPlainText()
+        self.user_input_text_edit.setPlainText(current_text + "\n" + "사용자 입력: " + entered_text)
+
 
     def update_texts(self, text1, text2):
         pass  # No update for this example
