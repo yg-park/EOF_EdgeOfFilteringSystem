@@ -7,6 +7,7 @@ import cv2
 from GPIO_HW_control.rc_servo_motor import RCServoMotor
 from GPIO_HW_control.servo_motor import ServoMotor
 from GPIO_HW_control.button import Button
+from GPIO_HW_control.lcd import LCD
 from Communication.image_communication import ImageCommunication
 from Communication.audio_communication import AudioCommunication
 from Communication.hw_control_communication import HWControlCommunication
@@ -32,6 +33,7 @@ class LaneController:
         self.rc_servo_motor = RCServoMotor()
         self.button_controller = Button()
         self.servo_motor = ServoMotor()
+        self.lcd_controller = LCD()
         self.camera = cv2.VideoCapture(0)
 
     def _init_thread(self):
@@ -69,9 +71,13 @@ class LaneController:
             elif self.hw_control_comm.msg == "RC Start":
                 self.rc_servo_motor.start()
                 self.hw_control_comm.msg = ""
+                self.lcd_controller.display_clear()
+                self.lcd_controller.display_lcd('RCStart')
             elif self.hw_control_comm.msg == "RC Stop":
                 self.rc_servo_motor.stop()
                 self.hw_control_comm.msg = ""
+                self.lcd_controller.display_clear()
+                self.lcd_controller.display_lcd('RCStop')
 
     def execute(self):
         """스레드를 실행시킵니다."""
