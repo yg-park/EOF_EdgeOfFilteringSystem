@@ -15,9 +15,9 @@ CHUNK = 1024
 class AudioRecorder:
     """오디오 녹음을 위한 클래스입니다."""
     def __init__(self):
-        self.count = 0
+        self.count = -1
         self.filename = f'Audio/output_{self.count}.wav'
-
+        
     def start_recording(self) -> str:
         """음성 메세지를 녹음하고 저장합니다."""
         p = pyaudio.PyAudio()
@@ -42,13 +42,14 @@ class AudioRecorder:
         stream.close()
         p.terminate()
 
-        file_path = self._save_to_wav(frames)
+        self._save_to_wav(frames)
         
-        self.count = (self.count + 1) % 5
-        
-        return file_path
+        return self.filename
 
     def _save_to_wav(self, frames):
+        self.count = (self.count + 1) % 5
+        self.filename = f'Audio/output_{self.count}.wav'
+            
         p = pyaudio.PyAudio()
 
         wf = wave.open(self.filename, 'wb')
@@ -61,4 +62,4 @@ class AudioRecorder:
         p.terminate()
 
         print(f"Audio saved to {self.filename}")
-        return self.filename
+        # return self.filename

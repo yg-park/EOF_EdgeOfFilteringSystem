@@ -17,10 +17,12 @@ from Audio.voice_record import AudioRecorder
 class LaneController:
     """라인을 제어하기 위한 클래스입니다."""
     def __init__(self):
+        self.btn_clicked_flag = False
         self._init_comm()
         self._init_hw()
         self._init_thread()
-
+        
+        
     def __del__(self):
         self.camera.release()
         
@@ -34,21 +36,30 @@ class LaneController:
         self.button_controller = Button()
         self.servo_motor = ServoMotor()
         self.lcd_controller = LCD()
+        self.recorder = AudioRecorder()
         self.camera = cv2.VideoCapture(0)
-
+        
+        
     def _init_thread(self):
         self.webcam_thread = threading.Thread(target=self.send_frame_to_server)
         self.voice_thread = threading.Thread(
-            target=self.record_voice_and_send_voice_to_server)
+            target=self.record_voice_and_send_thread)
         self.hw_control_thread = threading.Thread(target=self.hw_control)
         self.servo_thread = threading.Thread(target=self.servo_motor.kick)
         self.listen_hw_control_thread = threading.Thread(
             target=self.hw_control_comm.receive)
+    def record_voice_and_send_thread(self):
+        while True:
+            if self.btn_clicked_flag==True:
+                print("btn click2")
+                file_path = self.recorder.start_recording()
+                self.audio_comm.send_audio_file(file_path)
+                self.btn_clicked_flag = False
 
     def record_voice_and_send_voice_to_server(self):
         """목소리 녹음 후, 해당 오디오 파일을 서버에 전송합니다."""
         recorder = AudioRecorder()
-        file_path = recorder.start_recording()
+        file_path = self.recorder.start_recording()
         self.audio_comm.send_audio_file(file_path)
 
     def send_frame_to_server(self):
@@ -64,7 +75,8 @@ class LaneController:
         """서버로부터 HW를 제어하는 통신을 받아 HW를 제어합니다."""
         while True:
             if self.button_controller.sensingBTN() is False:
-                self.voice_thread.start()
+                self.btn_clicked_flag = True
+                print("btn click")
             if self.hw_control_comm.msg == "Servo Kick":
                 self.servo_thread.start()
                 self.hw_control_comm.msg = ""
@@ -84,7 +96,7 @@ class LaneController:
         try:
             self.webcam_thread.start()
             self.hw_control_thread.start()
-            #self.button_thread.start()
+            self.voice_thread.start()
             self.listen_hw_control_thread.start()
         finally:
             self.webcam_thread.join()
