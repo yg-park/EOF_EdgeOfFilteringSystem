@@ -1,5 +1,5 @@
 """
-ㅇ
+라인을 제어하는 모듈입니다.
 """
 import threading
 import time
@@ -7,84 +7,81 @@ import cv2
 from GPIO_HW_control.rc_servo_motor import RCServoMotor
 from GPIO_HW_control.servo_motor import ServoMotor
 from GPIO_HW_control.button import Button
-from Comm.communication import ClientCommunication
-from Comm.send_audio import AudioCommunication
-from Comm.rcv_string import StringComm
-from audio.voice_record import AudioRecorder
+from Communication.image_communication import ImageCommunication
+from Communication.audio_communication import AudioCommunication
+from Communication.hw_control_communication import HWControlCommunication
+from Audio.voice_record import AudioRecorder
+
 
 class LaneController:
-    """desc:
-    
-    """
-    def __init__(self, pin, ip_address, port) -> None:
-        """desc:
-        
-        """
-        self.rc_servo_motor = RCServoMotor(pin["RC_SERVO_1"], pin["RC_SERVO_2"])
-        self.servo_motor = ServoMotor(pin["SERVO"])
-        self.rcv_str_comm = StringComm()
-        self.button_controller = Button()
-        self.camera = cv2.VideoCapture(0)
-        self.ip_address = ip_address
-        self.port = port
+    """라인을 제어하기 위한 클래스입니다."""
+    def __init__(self):
+        self._init_comm()
+        self._init_hw()
         self._init_thread()
-        
-        # self.mic = ???
-        # self.lcd = ???
 
     def __del__(self):
         self.camera.release()
+        
+    def _init_comm(self):
+        self.image_comm = ImageCommunication()
+        self.audio_comm = AudioCommunication()
+        self.hw_control_comm = HWControlCommunication()
+    
+    def _init_hw(self):
+        self.rc_servo_motor = RCServoMotor()
+        self.button_controller = Button()
+        self.servo_motor = ServoMotor()
+        self.camera = cv2.VideoCapture(0)
 
     def _init_thread(self):
-        self.comm = ClientCommunication(self.ip_address, self.port["PORT_IMAGE"])
-        self.webcam_thread = threading.Thread(target=self.send_webcam_thread)
-        self.voice_thread = threading.Thread(target=self.send_voice_thread)
-        self.HW_thread = threading.Thread(target=self.HW_control)
+        self.webcam_thread = threading.Thread(target=self.send_frame_to_server)
+        self.voice_thread = threading.Thread(
+            target=self.record_voice_and_send_voice_to_server)
+        self.hw_control_thread = threading.Thread(target=self.hw_control)
         self.servo_thread = threading.Thread(target=self.servo_motor.kick)
-        self.listen_str_thread = threading.Thread(target=self.rcv_str_comm.receive)
+        self.listen_hw_control_thread = threading.Thread(
+            target=self.hw_control_comm.receive)
 
-    def send_voice_thread(self):
+    def record_voice_and_send_voice_to_server(self):
+        """목소리 녹음 후, 해당 오디오 파일을 서버에 전송합니다."""
         recorder = AudioRecorder()
-        recorder.start_recording()
-        time.sleep(5)
-        recorder.stop_recording()
+        file_path = recorder.start_recording()
+        self.audio_comm.send_audio_file(file_path)
 
-        audio_sender = AudioCommunication(self.ip_address, self.port["PORT_VOICE"])
-        audio_sender.send_audio_file()
-
-    def send_webcam_thread(self):
+    def send_frame_to_server(self):
+        """웹캠으로부터 얻은 이미지 프레임을 서버로 전송합니다."""
         while True:
             _, frame = self.camera.read()
             if frame is None:
                 continue
-            self.comm.send_frame(frame)
-            time.sleep(1/60)        
-            
-    def HW_control(self):
-        """
-        hw관련 서버로부터 통신 받는 쓰레드 함수
-        서보모터(1)/rc서보모터 on(2) off(3)
-        """
+            self.image_comm.send_frame(frame)
+            time.sleep(1/60)
+
+    def hw_control(self):
+        """서버로부터 HW를 제어하는 통신을 받아 HW를 제어합니다."""
         while True:
             if self.button_controller.sensingBTN() is False:
                 self.voice_thread.start()
-            if self.rcv_str_comm.msg == 1:
+            if self.hw_control_comm.msg == "Servo Kick":
                 self.servo_thread.start()
-                self.rcv_str_comm.msg = 0
-            elif self.rcv_str_comm.msg == 2:
+                self.hw_control_comm.msg = ""
+            elif self.hw_control_comm.msg == "RC Start":
                 self.rc_servo_motor.start()
-                self.rcv_str_comm.msg = 0
-            elif self.rcv_str_comm.msg == 3:
+                self.hw_control_comm.msg = ""
+            elif self.hw_control_comm.msg == "RC Stop":
                 self.rc_servo_motor.stop()
-                self.rcv_str_comm.msg = 0
- 
+                self.hw_control_comm.msg = ""
+
     def execute(self):
+        """스레드를 실행시킵니다."""
         try:
             self.webcam_thread.start()
-            self.HW_thread.start()
-            self.listen_str_thread.start()
+            self.hw_control_thread.start()
+            #self.button_thread.start()
+            self.listen_hw_control_thread.start()
         finally:
             self.webcam_thread.join()
-            self.HW_thread.join()
+            self.hw_control_thread.join()
             self.voice_thread.join()
-            self.listen_str_thread.join()
+            self.listen_hw_control_thread.join()

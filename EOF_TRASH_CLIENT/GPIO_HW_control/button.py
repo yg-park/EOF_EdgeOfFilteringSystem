@@ -1,9 +1,13 @@
+"""
+버튼과 관련된 작업을 수행하는 모듈입니다.
+"""
 import RPi.GPIO as GPIO
 import time
 
 BUTTON_PIN = 6
 
 class Button:
+    """버튼 입력을 받기 위한 클래스입니다."""
     def __init__(self):
         self.BUTTON_PIN = BUTTON_PIN
         self.lastButtonState = GPIO.HIGH

@@ -1,43 +1,32 @@
 """
-servo motor control in raspberry pi 4
+서보모터를 제어하는 모듈입니다.
 """
 import time
 import RPi.GPIO as GPIO
-from GPIO_HW_control.hw_interface import HWInterface
+
+SERVO_PIN = 23
 
 
-class ServoMotor(HWInterface):
-    """
-    desc:
-    """
-    def __init__(self, servo_pin):
-        self.servo_pin = servo_pin
+class ServoMotor:
+    """서보모터를 제어하는 클래스입니다."""
+    def __init__(self):
+        self.servo_pin = SERVO_PIN
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(servo_pin, GPIO.OUT)
-        self.pwm = GPIO.PWM(servo_pin, 50)  # 주파수 50Hz로 PWM 생성
+        GPIO.setup(self.servo_pin, GPIO.OUT)
+        self.pwm = GPIO.PWM(self.servo_pin, 50)  # 주파수 50Hz로 PWM 생성
         self.pwm.start(0)  # PWM 시작
 
     def __del__(self):
         self.pwm.stop()
         GPIO.cleanup(self.servo_pin)
 
-    def control(self):
-        """
-        desc:
-        """
-
     def kick(self):
-        """
-        desc:
-        """
-        self.set_servo_angle(90)
+        """서보모터를 작동합니다."""
+        self._set_servo_angle(90)
         time.sleep(1)
-        self.set_servo_angle(0)
+        self._set_servo_angle(0)
 
-    def set_servo_angle(self, angle):
-        """
-        desc:
-        """
+    def _set_servo_angle(self, angle):
         duty_cycle = (angle / 18) + 2  # 각도를 PWM 듀티 사이클로 변환
         GPIO.output(self.servo_pin, True)
         self.pwm.ChangeDutyCycle(duty_cycle)

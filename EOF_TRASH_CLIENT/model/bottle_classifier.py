@@ -1,3 +1,4 @@
+"""입력 영상으로 부터 페트병을 classify 하는 모듈입니다."""
 import torch
 import torch.nn as nn
 from torchvision import models, transforms
@@ -39,31 +40,11 @@ class BottleClassifier:
         """
         input_cv2_frame = cv2.cvtColor(input_cv2_frame, cv2.COLOR_BGR2RGB)
         trans_cv2_frame = self.data_transforms(input_cv2_frame)
-        
+
         with torch.no_grad():
-            outputs = self.model(trans_cv2_frame.unsqueeze(0)) # 모델은 batch 디멘션이 포함된 4D 형태의 인풋을 기대하고 있으므로 3D 단일 이미지를 4D로 증강
+            # 모델은 batch 디멘션이 포함된 4D 형태의 인풋을 기대하고 있으므로 3D 단일 이미지를 4D로 증강
+            outputs = self.model(trans_cv2_frame.unsqueeze(0))
             _, predicts = torch.max(outputs, 1)
 
-        return self.class_name[predicts[0]] # 'nl_bottle' 또는 'yl_bottle'
-        
-
-
-
-"""
-PATH = './eof_bottle_classification_model.pth'
-eof_model = BottleClassifier(PATH)
-
-test_img = cv2.imread("test_input4.jpg")
-result = eof_model.classify(test_img)
-print(f"추론결과: {result}")
-test_img = cv2.imread("test_input3.jpg")
-result = eof_model.classify(test_img)
-print(f"추론결과: {result}")
-test_img = cv2.imread("test_input2.jpg")
-result = eof_model.classify(test_img)
-print(f"추론결과: {result}")
-test_img = cv2.imread("test_input1.jpg")
-result = eof_model.classify(test_img)
-print(f"추론결과: {result}")
-"""
-
+        # 'nl_bottle' 또는 'yl_bottle'
+        return self.class_name[predicts[0]]
