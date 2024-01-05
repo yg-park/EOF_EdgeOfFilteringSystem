@@ -2,12 +2,16 @@
 """
 import queue
 import time
+import cv2
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton
 from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
 from PyQt_framework.rcv_img_thread import ReceiveImage
 from PyQt_framework.rcv_audio_thread import ReceiveAudio
-from EOF_TRASH_SERVER.Comm.hw_control_comm import HwControlComm
+from Comm.hw_control_comm import HwControlComm
+
+from Inference.pet_bottle_detector import PetBottleDetector
+from Inference.pet_bottle_classifier import PetBottleClassifier
 
 
 class MainGUI(QMainWindow):
@@ -24,6 +28,12 @@ class MainGUI(QMainWindow):
         self.timer.start(60)  # 초당 60프레임
 
         self.HW_control_comm = HwControlComm()
+        
+        self.pet_detector = PetBottleDetector()
+        self.pet_classifier = PetBottleClassifier()
+
+        # Counter variable
+        self.counter = 0
 
     def init_UI(self):
         """기본 UI틀을 생성합니다."""
@@ -35,7 +45,7 @@ class MainGUI(QMainWindow):
         self.layout = QVBoxLayout(self.central_widget)
 
         self.image_label = QLabel(self)
-        pixmap = QPixmap("example.jpg")
+        pixmap = QPixmap("resources/idle_frame.png")
         self.image_label.setPixmap(pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio))
 
         self.small_text_label = QLabel("Small Centered Text", self)
@@ -91,6 +101,28 @@ class MainGUI(QMainWindow):
         if not self.frame_queue.empty():
             image_data = self.frame_queue.get()
 
+            detection, center, coordinate = self.pet_detector.detect_pet_bottle(image_data)
+            if detection == True:
+                if center == True:
+                    print("센터 잡았다")
+                    # 여기서 classification을 발생시키고 클라이언트에 전송하는 로직이 추가되어야 함
+                    target_crop_frame = image_data[coordinate[1]:coordinate[3],
+                                                   coordinate[0]:coordinate[2]]
+                    result = self.pet_classifier.classify_pet_bottle(target_crop_frame)
+
+                    if result == 0:
+                        print("추론결과 clear_bottle")
+                    elif result == 1:
+                        print("추론결과 label_bottle")
+                        # 여기서 client가 kick을 하도록 메세지를 전송해야함
+
+                cv2.rectangle(image_data,
+                            (coordinate[0], coordinate[1]),
+                            (coordinate[2], coordinate[3]),
+                            (0, 255, 0), 2)
+
+            # 여기서 조건에 따라 페트병 전처리 함수 혹은 유리병 전처리 함수를 받아야 함
+
             # 서버에서 수신한 이미지 numpy array를 QImage로 변환
             height, width, channels = image_data.shape
             bytes_per_line = channels * width
@@ -101,6 +133,8 @@ class MainGUI(QMainWindow):
                 self.image_label.setPixmap(pixmap)
             else:
                 print("Invalid image data.1")
+
+
 
     def update_text_edit(self, message):
         """메인 GUI의 텍스트박스를 업데이트 합니다."""

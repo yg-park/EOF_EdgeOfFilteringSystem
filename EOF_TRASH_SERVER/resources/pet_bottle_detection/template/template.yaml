@@ -1,9 +1,9 @@
 model_template_id: Custom_Object_Detection_YOLOX
-name: YOLOX
+name: YOLOX-TINY
 task_type: DETECTION
 task_family: VISION
 instantiation: CLASS
-summary: Class-Incremental Object Detection for YOLOX
+summary: Class-Incremental Object Detection for YOLOX-TINY
 application: null
 framework: OTXDetection v2.9.1
 entrypoints:
@@ -19,6 +19,8 @@ hyper_parameters:
       batch_size:
         default_value: 8
         auto_hpo_state: POSSIBLE
+      inference_batch_size:
+        default_value: 8
       learning_rate:
         default_value: 0.0002
         auto_hpo_state: POSSIBLE
