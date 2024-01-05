@@ -9,6 +9,6 @@ from PyQt_framework.GUI import MainGUI
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainGUI()
-    window.setGeometry(100, 100, 1200, 800)
+    window.setGeometry(100, 100, 750, 800)
     window.show()
     sys.exit(app.exec_())

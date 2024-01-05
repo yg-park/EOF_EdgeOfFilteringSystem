@@ -14,6 +14,8 @@ from Inference.pet_bottle_detector import PetBottleDetector
 from Inference.pet_bottle_classifier import PetBottleClassifier
 
 
+
+
 class MainGUI(QMainWindow):
     """메인 GUI에 관한 클래스입니다."""
     def __init__(self):
@@ -146,7 +148,7 @@ class MainGUI(QMainWindow):
 
     def operate_line(self):
         """라인을 가동합니다."""
-        self.HW_control_comm.send(message='RC operate')
+        self.HW_control_comm.send(message='RC Start')
         
         current_time = time.localtime()
 
@@ -158,7 +160,7 @@ class MainGUI(QMainWindow):
 
     def stop_line(self):
         """라인을 중지합니다."""
-        self.HW_control_comm.send(message='RC stop')
+        self.HW_control_comm.send(message='RC Stop')
         
         current_time = time.localtime()
 
