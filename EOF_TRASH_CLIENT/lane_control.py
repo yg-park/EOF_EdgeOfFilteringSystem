@@ -78,7 +78,7 @@ class LaneController:
         try:
             self.webcam_thread.start()
             self.hw_control_thread.start()
-            self.voice_thread.start()
+            #self.button_thread.start()
             self.listen_hw_control_thread.start()
         finally:
             self.webcam_thread.join()
