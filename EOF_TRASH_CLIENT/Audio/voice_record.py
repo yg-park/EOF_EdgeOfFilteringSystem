@@ -16,7 +16,7 @@ class AudioRecorder:
     """오디오 녹음을 위한 클래스입니다."""
     def __init__(self):
         self.count = 0
-        self.filename = f'audio/output_{self.count}.wav'
+        self.filename = f'Audio/output_{self.count}.wav'
 
     def start_recording(self) -> str:
         """음성 메세지를 녹음하고 저장합니다."""
