@@ -10,7 +10,7 @@ class GlassBottleClassifier(OTXAPI):
     model_weight_path = "resources/glass_bottle_classification/model/model.xml"
     model_name = "Custom_Image_Classification_EfficientNet-V2-S"
 
-    def classify_pet_bottle(self, frame) -> int:
+    def classify_glass_bottle(self, frame) -> int:
         """ 비닐 라벨이 제거된 페트병이면 0을 리턴하고,
             비닐라벨이 제거되지 않은 페트병이면 1을 리턴한다.
             frame: 웹캠으로부터 얻은 영상

@@ -22,17 +22,19 @@ class AudioComm():
 
     def receive(self) -> None:
         """클라이언트 측에서 녹음한 내용을 수신합니다."""
-        print("Waiting for a voice_receive_connection...")
-        client_socket, client_address = self.socket.accept()
-        print(f"Connection from {client_address}")
+        
+        while True:
+            print("Waiting for a voice_receive_connection...")
+            client_socket, client_address = self.socket.accept()
+            print(f"Connection from {client_address}")
 
-        file_path = Path('resources/received_audio.wav')
+            file_path = Path('resources/received_audio.wav')
 
-        # 오디오 파일 수신
-        with open(file_path, 'wb') as file:
-            while True:
-                data = client_socket.recv(1024)
-                if not data:
-                    break
-                file.write(data)
-        print("File received successfully.")
+            # 오디오 파일 수신
+            with open(file_path, 'wb') as file:
+                while True:
+                    data = client_socket.recv(1024)
+                    if not data:
+                        break
+                    file.write(data)
+            print("File received successfully.")
