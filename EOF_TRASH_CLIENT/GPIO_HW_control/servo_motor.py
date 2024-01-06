@@ -22,7 +22,7 @@ class ServoMotor:
 
     def kick(self):
         """서보모터를 작동합니다."""
-        self._set_servo_angle(90)
+        self._set_servo_angle(45)
         time.sleep(1)
         self._set_servo_angle(0)
 
@@ -30,6 +30,6 @@ class ServoMotor:
         duty_cycle = (angle / 18) + 2  # 각도를 PWM 듀티 사이클로 변환
         GPIO.output(self.servo_pin, True)
         self.pwm.ChangeDutyCycle(duty_cycle)
-        time.sleep(1)  # 1초 대기 (서보 모터가 동작할 시간)
+        time.sleep(0.2)  # 1초 대기 (서보 모터가 동작할 시간)
         GPIO.output(self.servo_pin, False)
         self.pwm.ChangeDutyCycle(0)

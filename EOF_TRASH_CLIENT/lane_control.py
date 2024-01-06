@@ -1,6 +1,7 @@
 """
 라인을 제어하는 모듈입니다.
 """
+import asyncio
 import threading
 import time
 import cv2
@@ -44,17 +45,44 @@ class LaneController:
         self.webcam_thread = threading.Thread(target=self.send_frame_to_server)
         self.voice_thread = threading.Thread(
             target=self.record_voice_and_send_thread)
-        self.hw_control_thread = threading.Thread(target=self.hw_control)
+        #self.hw_control_thread = threading.Thread(target=self.hw_control)
+        self.hw_control_thread = threading.Thread(target=lambda:asyncio.run(self.async_hw_control_thread()))
         self.servo_thread = threading.Thread(target=self.servo_motor.kick)
         self.listen_hw_control_thread = threading.Thread(
             target=self.hw_control_comm.receive)
-    def record_voice_and_send_thread(self):
+
+    async def async_servo_handler(self):
+        print("event occur")
+        self.servo_motor._set_servo_angle(45)
+        await asyncio.sleep(2)
+        self.servo_motor._set_servo_angle(0)
+
+    async def async_hw_control_thread(self):
         while True:
-            if self.btn_clicked_flag==True:
-                print("btn click2")
-                file_path = self.recorder.start_recording()
-                self.audio_comm.send_audio_file(file_path)
-                self.btn_clicked_flag = False
+            if self.button_controller.sensingBTN() is False:
+                await self.record_voice_and_send_thread()
+                print("btn click")
+            if self.hw_control_comm.msg == "Servo Kick":
+                await self.async_servo_handler()
+                self.hw_control_comm.msg = ""
+            elif self.hw_control_comm.msg == "RC Start":
+                self.rc_servo_motor.start()
+                self.hw_control_comm.msg = ""
+                self.lcd_controller.display_clear()
+                self.lcd_controller.display_lcd('RCStart')
+            elif self.hw_control_comm.msg == "RC Stop":
+                self.rc_servo_motor.stop()
+                self.hw_control_comm.msg = ""
+                self.lcd_controller.display_clear()
+                self.lcd_controller.display_lcd('RCStop')
+            
+
+
+    async def record_voice_and_send_thread(self):
+        print("btn click2")
+        file_path = self.recorder.start_recording()
+        self.audio_comm.send_audio_file(file_path)
+
 
     def record_voice_and_send_voice_to_server(self):
         """목소리 녹음 후, 해당 오디오 파일을 서버에 전송합니다."""
@@ -96,10 +124,10 @@ class LaneController:
         try:
             self.webcam_thread.start()
             self.hw_control_thread.start()
-            self.voice_thread.start()
+            #self.voice_thread.start()
             self.listen_hw_control_thread.start()
         finally:
             self.webcam_thread.join()
             self.hw_control_thread.join()
-            self.voice_thread.join()
+            #self.voice_thread.join()
             self.listen_hw_control_thread.join()
