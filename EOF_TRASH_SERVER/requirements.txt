@@ -10,8 +10,8 @@ openvino==2023.0.0
 openvino-model-api==0.1.8
 otx==1.4.4
 numpy>=1.21.0,<=1.23.5  # np.bool was removed in 1.24.0 which was used in openvino runtime
-torch==1.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
-torchvision==0.14.1 --extra-index-url https://download.pytorch.org/whl/cu117
+torch==2.1.2
+torchvision==0.16.2
 nncf==2.6.0
 onnx==1.13.0
 
