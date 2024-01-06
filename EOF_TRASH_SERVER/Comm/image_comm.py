@@ -24,7 +24,7 @@ class ImageComm():
 
     def receive(self, frame_queue) -> None:
         """이미지를 수신 받는 함수입니다. 수신받은 이미지를 큐에 삽입합니다.
-        
+
         : param1(frame_queue) - 이미지를 저장할 큐 입니다.
         """
         print(f'Serving on {self.ip_address}:{self.port}')
@@ -46,3 +46,4 @@ class ImageComm():
             # 바이트로 된 이미지 데이터를 이미지 포맷으로 변환
             img_np = cv2.imdecode(np.frombuffer(img_data, dtype=np.uint8), 1)
             frame_queue.put(img_np)
+        
