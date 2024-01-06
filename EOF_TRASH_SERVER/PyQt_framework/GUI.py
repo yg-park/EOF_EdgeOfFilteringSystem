@@ -6,14 +6,14 @@ import cv2
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton
 from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
+
 from PyQt_framework.rcv_img_thread import ReceiveImage
 from PyQt_framework.rcv_audio_thread import ReceiveAudio
-from Comm.hw_control_comm import HwControlComm
+from PyQt_framework.ROI_detect_classify_thread import ClassifyTimingChecker
 
+from Comm.hw_control_comm import HwControlComm
 from Inference.pet_bottle_detector import PetBottleDetector
 from Inference.pet_bottle_classifier import PetBottleClassifier
-
-
 
 
 class MainGUI(QMainWindow):
@@ -21,7 +21,7 @@ class MainGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.init_UI()  # 기본 UI틀을 생성합니다.
-        self.frame_queue = queue.Queue()  # 동영상 스트리밍용 queue를 생성합니다.
+        self.frame_queue = queue.Queue(maxsize=60)  # 동영상 스트리밍용 queue를 생성합니다.
         self.start_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
 
         # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
@@ -30,7 +30,6 @@ class MainGUI(QMainWindow):
         self.timer.start(60)  # 초당 60프레임
 
         self.HW_control_comm = HwControlComm()
-        
         self.pet_detector = PetBottleDetector()
         self.pet_classifier = PetBottleClassifier()
 
@@ -90,43 +89,52 @@ class MainGUI(QMainWindow):
             
             audio_recv_thread는
             클라이언트로부터 음성을 송신받는 스레드 입니다.
+            
+            ClassifyTimingCheck_thread는
+            객체가 탐지되었을 때 단한번만 분류를 실시하기 위한 스레드 입니다.
         """
         self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
         self.audio_recv_thread = ReceiveAudio()
         self.audio_recv_thread.start()
+        
+        self.ClassifyTimingCheck_thread = ClassifyTimingChecker()
+        self.ClassifyTimingCheck_thread.finished_signal.connect(
+            self.send_classification_result
+            )
 
     def update_pixmap(self):
         """메인 GUI의 이미지를 업데이트 합니다."""
         if not self.frame_queue.empty():
-            image_data = self.frame_queue.get()
+            frame = self.frame_queue.get()
 
-            detection, center, coordinate = self.pet_detector.detect_pet_bottle(image_data)
-            if detection == True:
-                if center == True:
-                    print("센터 잡았다")
-                    # 여기서 classification을 발생시키고 클라이언트에 전송하는 로직이 추가되어야 함
-                    target_crop_frame = image_data[coordinate[1]:coordinate[3],
-                                                   coordinate[0]:coordinate[2]]
-                    result = self.pet_classifier.classify_pet_bottle(target_crop_frame)
+            (detected, prediction_accuracy, crop_frame_coordinate) \
+                = self.pet_detector.detect_pet_bottle(frame)
+            
+            if detected:
+                cv2.rectangle(frame,
+                              (crop_frame_coordinate[0], crop_frame_coordinate[1]),
+                              (crop_frame_coordinate[2], crop_frame_coordinate[3]),
+                              (0, 255, 0), 2)
 
-                    if result == 0:
-                        print("추론결과 clear_bottle")
-                    elif result == 1:
-                        print("추론결과 label_bottle")
-                        # 여기서 client가 kick을 하도록 메세지를 전송해야함
-
-                cv2.rectangle(image_data,
-                            (coordinate[0], coordinate[1]),
-                            (coordinate[2], coordinate[3]),
-                            (0, 255, 0), 2)
-
-            # 여기서 조건에 따라 페트병 전처리 함수 혹은 유리병 전처리 함수를 받아야 함
-
-            # 서버에서 수신한 이미지 numpy array를 QImage로 변환
-            height, width, channels = image_data.shape
+                # 트리거
+                if crop_frame_coordinate[2] > 320 and crop_frame_coordinate[2] < 480:
+                    print("트리거 조건에 걸렸다.")
+                    
+                    if self.ClassifyTimingCheck_thread.on_process is False:
+                        self.ClassifyTimingCheck_thread.start()
+                    else:
+                        print("--image 들어가는중")
+                        self.ClassifyTimingCheck_thread.detection_frame_list.append(
+                            (prediction_accuracy,
+                             frame[crop_frame_coordinate[1]:crop_frame_coordinate[3],
+                                   crop_frame_coordinate[0]:crop_frame_coordinate[2]])
+                        )
+            
+            
+            height, width, channels = frame.shape
             bytes_per_line = channels * width
-            q_image = QImage(image_data.data, width, height, bytes_per_line, QImage.Format_BGR888)
+            q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_BGR888)
 
             if not q_image.isNull():
                 pixmap = QPixmap.fromImage(q_image)
@@ -134,7 +142,16 @@ class MainGUI(QMainWindow):
             else:
                 print("Invalid image data.1")
 
+    def send_classification_result(self, max_accracy_frame):
+        result = self.pet_classifier.classify_pet_bottle(max_accracy_frame)
+        # 클라이언트로 분류 결과를 전송
+        if result == 0:
+            print("CLEAR BOTTLE 결과 전송")
+        elif result == 1:
+            print("LABEL BOTTLE 결과 전송")
+            self.HW_control_comm.send(message="Servo Kick")
 
+        return
 
     def update_text_edit(self, message):
         """메인 GUI의 텍스트박스를 업데이트 합니다."""
