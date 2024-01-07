@@ -12,8 +12,8 @@ from PyQt_framework.rcv_audio_thread import ReceiveAudio
 from PyQt_framework.ROI_detect_classify_thread import ClassifyTimingChecker
 
 from Comm.hw_control_comm import HwControlComm
-from Inference.pet_bottle_detector import PetBottleDetector
-from Inference.pet_bottle_classifier import PetBottleClassifier
+from Inference.bottle_detector import BottleDetector
+from Inference.bottle_classifier import BottleClassifier
 
 
 class MainGUI(QMainWindow):
@@ -21,17 +21,17 @@ class MainGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.init_UI()  # 기본 UI틀을 생성합니다.
-        self.frame_queue = queue.Queue(maxsize=60)  # 동영상 스트리밍용 queue를 생성합니다.
+        self.frame_queue = queue.Queue(maxsize=30)  # 동영상 스트리밍용 queue를 생성합니다.
         self.start_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
 
         # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_pixmap)
-        self.timer.start(60)  # 초당 60프레임
+        self.timer.start(30)  # 초당 30프레임
 
-        self.HW_control_comm = HwControlComm()
-        self.pet_detector = PetBottleDetector()
-        self.pet_classifier = PetBottleClassifier()
+        self.hw_control_comm = HwControlComm()
+        self.detector = BottleDetector()
+        self.classifier = BottleClassifier()
 
         # Counter variable
         self.counter = 0
@@ -83,13 +83,13 @@ class MainGUI(QMainWindow):
 
     def start_threads(self):
         """ 프로그램 동작에 필요한 스레드들을 실행합니다
-        
+
             video_stream_thread는
             클라이언트로부터 영상을 송신받는 스레드 입니다.
-            
+
             audio_recv_thread는
             클라이언트로부터 음성을 송신받는 스레드 입니다.
-            
+
             ClassifyTimingCheck_thread는
             객체가 탐지되었을 때 단한번만 분류를 실시하기 위한 스레드 입니다.
         """
@@ -97,7 +97,7 @@ class MainGUI(QMainWindow):
         self.video_stream_thread.start()
         self.audio_recv_thread = ReceiveAudio()
         self.audio_recv_thread.start()
-        
+
         self.ClassifyTimingCheck_thread = ClassifyTimingChecker()
         self.ClassifyTimingCheck_thread.finished_signal.connect(
             self.send_classification_result
@@ -108,9 +108,10 @@ class MainGUI(QMainWindow):
         if not self.frame_queue.empty():
             frame = self.frame_queue.get()
 
+            # roi = frame[80:400, :]
             (detected, prediction_accuracy, crop_frame_coordinate) \
-                = self.pet_detector.detect_pet_bottle(frame)
-            
+                = self.detector.detect_bottle(frame)
+
             if detected:
                 cv2.rectangle(frame,
                               (crop_frame_coordinate[0], crop_frame_coordinate[1]),
@@ -119,8 +120,6 @@ class MainGUI(QMainWindow):
 
                 # 트리거
                 if crop_frame_coordinate[2] > 320 and crop_frame_coordinate[2] < 480:
-                    print("트리거 조건에 걸렸다.")
-                    
                     if self.ClassifyTimingCheck_thread.on_process is False:
                         self.ClassifyTimingCheck_thread.start()
                     else:
@@ -130,8 +129,7 @@ class MainGUI(QMainWindow):
                              frame[crop_frame_coordinate[1]:crop_frame_coordinate[3],
                                    crop_frame_coordinate[0]:crop_frame_coordinate[2]])
                         )
-            
-            
+
             height, width, channels = frame.shape
             bytes_per_line = channels * width
             q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_BGR888)
@@ -143,15 +141,14 @@ class MainGUI(QMainWindow):
                 print("Invalid image data.1")
 
     def send_classification_result(self, max_accracy_frame):
-        result = self.pet_classifier.classify_pet_bottle(max_accracy_frame)
-        # 클라이언트로 분류 결과를 전송
+        """클라이언트로 분류 결과를 전송합니다."""
+        result = self.classifier.classify_bottle(max_accracy_frame)
+
         if result == 0:
             print("CLEAR BOTTLE 결과 전송")
         elif result == 1:
             print("LABEL BOTTLE 결과 전송")
-            self.HW_control_comm.send(message="Servo Kick")
-
-        return
+            self.hw_control_comm.send(message="Servo Kick")
 
     def update_text_edit(self, message):
         """메인 GUI의 텍스트박스를 업데이트 합니다."""
@@ -165,7 +162,7 @@ class MainGUI(QMainWindow):
 
     def operate_line(self):
         """라인을 가동합니다."""
-        self.HW_control_comm.send(message='RC Start')
+        self.hw_control_comm.send(message='RC Start')
         
         current_time = time.localtime()
 
@@ -177,7 +174,7 @@ class MainGUI(QMainWindow):
 
     def stop_line(self):
         """라인을 중지합니다."""
-        self.HW_control_comm.send(message='RC Stop')
+        self.hw_control_comm.send(message='RC Stop')
         
         current_time = time.localtime()
 
@@ -197,7 +194,7 @@ class MainGUI(QMainWindow):
         pass  # No update for this example
 
     def closeEvent(self, event):
-        # 어플리케이션이 종료될 때 스레드를 정리
+        """어플리케이션이 종료될 때 실행중인 스레드를 종료합니다."""
         self.video_stream_thread.quit()
         self.video_stream_thread.wait()
         self.audio_recv_thread.quit()
