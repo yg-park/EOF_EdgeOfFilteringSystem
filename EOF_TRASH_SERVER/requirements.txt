@@ -17,3 +17,6 @@ onnx==1.13.0
 
 # GUI 출력에 필요한 라이브러리
 PyQt5==5.15.10
+
+# Speech To Text: OpenAI whisper
+openai-whisper==20231117
