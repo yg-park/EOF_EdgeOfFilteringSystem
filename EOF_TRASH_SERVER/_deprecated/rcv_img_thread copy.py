@@ -2,7 +2,7 @@
 이미지 통신을 위한 스레드 모듈입니다.
 """
 from PyQt5.QtCore import QThread
-from Comm.image_comm import ImageComm
+from _deprecated.image_comm import ImageComm
 
 
 class ReceiveImage(QThread):

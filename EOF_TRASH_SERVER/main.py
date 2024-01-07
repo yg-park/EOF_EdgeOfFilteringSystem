@@ -3,8 +3,7 @@
 """
 import sys
 from PyQt5.QtWidgets import QApplication
-from PyQt_framework.GUI import MainGUI
-
+from pyqtGUI.main_window import MainGUI
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

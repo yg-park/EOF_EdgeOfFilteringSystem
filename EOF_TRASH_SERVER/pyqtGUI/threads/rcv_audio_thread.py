@@ -1,0 +1,46 @@
+"""
+오디오 통신을 위한 스레드 모듈입니다.
+"""
+import socket
+from pathlib import Path
+from PyQt5.QtCore import QThread, pyqtSignal
+
+IP_ADDRESS = "10.10.15.58"
+AUDIO_PORT = 7777
+
+
+class ReceiveAudio(QThread):
+    """오디오 통신을 위한 스레드 객체 입니다."""
+    rcv_audio_signal = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.ip_address = IP_ADDRESS
+        self.port = AUDIO_PORT
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.bind((self.ip_address, self.port))
+        self.socket.listen(1)
+
+    def __del__(self):
+        self.socket.close()
+
+    def run(self):
+        """클라이언트 측에서 녹음한 내용을 수신합니다."""
+
+        while True:
+            print("Waiting for a voice_receive_connection...")
+            client_socket, client_address = self.socket.accept()
+            print(f"Connection from {client_address}")
+
+            file_path = Path('resources/received_audio.wav')
+
+            # 오디오 파일 수신
+            with open(file_path, 'wb') as file:
+                while True:
+                    data = client_socket.recv(1024)
+                    if not data:
+                        break
+                    file.write(data)
+            
+            print("File received successfully.")
+            self.rcv_audio_signal.emit()

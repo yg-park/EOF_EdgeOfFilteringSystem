@@ -1,7 +1,7 @@
 """
 영상 프레임에서 target 물체를 detection하기 위한 모듈입니다.
 """
-from Inference.otx_api import OTXAPI
+from utils.Inference.otx_api import OTXAPI
 
 
 class BottleDetector(OTXAPI):

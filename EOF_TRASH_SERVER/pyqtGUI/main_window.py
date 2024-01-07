@@ -1,4 +1,5 @@
 """
+메인 GUI 출력을 담당하는 모듈입니다.
 """
 import queue
 import time
@@ -7,13 +8,13 @@ from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayo
 from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
 
-from PyQt_framework.rcv_img_thread import ReceiveImage
-from PyQt_framework.rcv_audio_thread import ReceiveAudio
-from PyQt_framework.ROI_detect_classify_thread import ClassifyTimingChecker
+from utils.Comm.hw_control_comm import HwControlComm
+from utils.Inference.bottle_detector import BottleDetector
+from utils.Inference.bottle_classifier import BottleClassifier
 
-from Comm.hw_control_comm import HwControlComm
-from Inference.bottle_detector import BottleDetector
-from Inference.bottle_classifier import BottleClassifier
+from pyqtGUI.threads.rcv_audio_thread import ReceiveAudio
+from pyqtGUI.threads.rcv_img_thread import ReceiveImage
+from pyqtGUI.threads.ROI_detect_classify_thread import ClassifyTimingChecker
 
 
 class MainGUI(QMainWindow):
@@ -96,6 +97,7 @@ class MainGUI(QMainWindow):
         self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
         self.audio_recv_thread = ReceiveAudio()
+        self.audio_recv_thread.rcv_audio_signal.connect(self.do_stt)
         self.audio_recv_thread.start()
 
         self.ClassifyTimingCheck_thread = ClassifyTimingChecker()
@@ -150,6 +152,10 @@ class MainGUI(QMainWindow):
             print("LABEL BOTTLE 결과 전송")
             self.hw_control_comm.send(message="Servo Kick")
 
+    def do_stt(self):
+        print("위스퍼를 이용하여 stt작업을 수행합니다.")
+        print("그리고 나서 모델 스위칭을 하는 것이면 어떻게 할지.. 스레드로 구성해야 할듯")
+
     def update_text_edit(self, message):
         """메인 GUI의 텍스트박스를 업데이트 합니다."""
         main_layout = self.layout.itemAt(0)
@@ -163,25 +169,23 @@ class MainGUI(QMainWindow):
     def operate_line(self):
         """라인을 가동합니다."""
         self.hw_control_comm.send(message='RC Start')
-        
-        current_time = time.localtime()
 
+        current_time = time.localtime()
         hour = current_time.tm_hour
         minute = current_time.tm_min
         second = current_time.tm_sec
-        
+
         self.user_input_text_edit.setPlainText(f"라인을 가동합니다. {hour}시 {minute}분 {second}초")
 
     def stop_line(self):
         """라인을 중지합니다."""
         self.hw_control_comm.send(message='RC Stop')
-        
-        current_time = time.localtime()
 
+        current_time = time.localtime()
         hour = current_time.tm_hour
         minute = current_time.tm_min
         second = current_time.tm_sec
-        
+
         self.user_input_text_edit.setPlainText(f"라인을 가동합니다. {hour}시 {minute}분 {second}초")
 
     def enter_clicked(self):
