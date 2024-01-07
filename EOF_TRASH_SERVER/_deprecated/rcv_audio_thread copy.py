@@ -1,7 +1,7 @@
 """ 오디오 통신을 위한 스레드 모듈입니다.
 """
 from PyQt5.QtCore import QThread
-from Comm.audio_comm import AudioComm
+from _deprecated.audio_comm import AudioComm
 
 
 class ReceiveAudio(QThread):

@@ -3,6 +3,7 @@
 """
 import socket
 
+
 IP_ADDRESS = "10.10.15.200"
 STRING_SEND_PORT = 6666
 
@@ -17,7 +18,7 @@ class HwControlComm():
 
     def send(self, message) -> None:
         """ 하드웨어를 제어할 명령을 보냅니다.
-        
+
         :param1(order) - 하드웨어로 보낼 명령입니다.
         """
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
