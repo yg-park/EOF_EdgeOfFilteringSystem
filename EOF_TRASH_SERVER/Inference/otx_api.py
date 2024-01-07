@@ -18,36 +18,30 @@ from otx.api.entities.image import Image
 class OTXAPI:
     """AI 모델 클래스화의 기반이 되는 OTX API를 정의한 부모 클래스"""
 
-    model_template_path = None
-    model_weight_path = None
-    model_name = None
-
     def __init__(self):
-        self.task = self._init_task()
+        self.task = None
 
-    def _init_task(self):
-        registry = Registry(self.model_template_path)
-        template = registry.get(self.model_name)
+    def _init_task(self, model_template_path, model_weight_path, model_name):
+        registry = Registry(model_template_path)
+        template = registry.get(model_name)
         hyper_parameters = template.hyper_parameters.data
         hyper_parameters = create_parameters_from_parameters_schema(hyper_parameters)
         environment = TaskEnvironment(
             model=None,
             hyper_parameters=hyper_parameters,
-            label_schema=read_label_schema(self.model_weight_path),
+            label_schema=read_label_schema(model_weight_path),
             model_template=template,
             )
         environment.model = read_model(
-            environment.get_model_configuration(), self.model_weight_path, None
+            environment.get_model_configuration(), model_weight_path, None
             )
         task_class = (get_impl_class(template.entrypoints.openvino)
-                      if self.model_weight_path.endswith(".xml")
+                      if model_weight_path.endswith(".xml")
                       else get_impl_class(template.entrypoints.base))
         task = task_class(task_environment=environment)
         return task
 
     def _get_predictions(self, frame):
-        """Returns list of predictions made by task on a frame."""
-
         empty_annotation = AnnotationSceneEntity(annotations=[], kind=AnnotationSceneKind.PREDICTION)
 
         item = DatasetItemEntity(
