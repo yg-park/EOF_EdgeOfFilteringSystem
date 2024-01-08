@@ -57,13 +57,13 @@ class MainGUI(QMainWindow):
         self.line_stop_btn = QPushButton('라인 정지')
         self.line_stop_btn.clicked.connect(self.stop_line)
 
-        self.user_input_text_edit = QTextEdit(self)
-        self.user_input_text_edit.setPlainText("Log")
-        self.user_input_text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.log_text = QTextEdit(self)
+        self.log_text.setPlainText("Log")
+        self.log_text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
-        self.user_input = QTextEdit(self)
-        self.user_input.setPlainText("User Input")
-        self.user_input.setMaximumHeight(30)
+        self.user_input_text = QTextEdit(self)
+        self.user_input_text.setPlainText("User Input")
+        self.user_input_text.setMaximumHeight(30)
         self.enter_clicked_btn = QPushButton('전송')
         self.enter_clicked_btn.clicked.connect(self.enter_clicked)
 
@@ -74,12 +74,12 @@ class MainGUI(QMainWindow):
         sub_horizontal_layout_1.addWidget(self.line_start_btn)
         sub_horizontal_layout_1.addWidget(self.line_stop_btn)
 
-        sub_horizontal_layout_2.addWidget(self.user_input)
+        sub_horizontal_layout_2.addWidget(self.user_input_text)
         sub_horizontal_layout_2.addWidget(self.enter_clicked_btn)
 
         main_vertical_layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
         main_vertical_layout.addLayout(sub_horizontal_layout_1)
-        main_vertical_layout.addWidget(self.user_input_text_edit)
+        main_vertical_layout.addWidget(self.log_text)
         main_vertical_layout.addLayout(sub_horizontal_layout_2)
         self.layout.addLayout(main_vertical_layout)
 
@@ -154,24 +154,42 @@ class MainGUI(QMainWindow):
     def send_classification_result(self, max_accracy_frame):
         """클라이언트로 분류 결과를 전송합니다."""
         result = self.classifier.classify_bottle(max_accracy_frame)
-
+        current_time = time.localtime()
+        hour = current_time.tm_hour
+        minute = current_time.tm_min
+        second = current_time.tm_sec
         if result == 0:
             print("CLEAR BOTTLE 결과 전송")
+            added_text = f"분류결과: 정상 {hour}시 {minute}분 {second}초"
+            log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + added_text
+            self.log_text.setPlainText(log)
         elif result == 1:
             print("LABEL BOTTLE 결과 전송")
             self.hw_control_comm.send(message="Servo Kick")
+            added_text = f"분류결과: 비정상 {hour}시 {minute}분 {second}초"
+            log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + added_text
+            self.log_text.setPlainText(log)
 
     def change_model(self):
         """페트병, 유리병 모델을 스위칭 합니다."""
+        current_time = time.localtime()
+        hour = current_time.tm_hour
+        minute = current_time.tm_min
+        second = current_time.tm_sec
         if self.detector.current_target == "pet":
             self.detector.set_model_target("glass")
+            added_text = f"페트병->유리병 감지. {hour}시 {minute}분 {second}초"
         elif self.detector.current_target == "glass":
             self.detector.set_model_target("pet")
-
+            added_text = f"유리병->페트병 감지. {hour}시 {minute}분 {second}초"
         if self.classifier.current_target == "pet":
             self.classifier.set_model_target("glass")
+            added_text = f"페트병->유리병 분류. {hour}시 {minute}분 {second}초"
         elif self.classifier.current_target == "glass":
             self.classifier.set_model_target("pet")
+            added_text = f"유리병->페트병 분류. {hour}시 {minute}분 {second}초"
+        log = self.log_text.toPlainText() + "\n" + "모델 변경: " + added_text
+        self.log_text.setPlainText(log)
 
         print(f"현재 detector의 target = {self.detector.current_target}")
         print(f"현재 classifier target = {self.classifier.current_target}")
@@ -194,8 +212,9 @@ class MainGUI(QMainWindow):
         hour = current_time.tm_hour
         minute = current_time.tm_min
         second = current_time.tm_sec
-
-        self.user_input_text_edit.setPlainText(f"라인을 가동합니다. {hour}시 {minute}분 {second}초")
+        added_text = f"라인을 가동합니다. {hour}시 {minute}분 {second}초"
+        log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + added_text
+        self.log_text.setPlainText(log)
 
     def stop_line(self):
         """라인을 중지합니다."""
@@ -205,14 +224,14 @@ class MainGUI(QMainWindow):
         hour = current_time.tm_hour
         minute = current_time.tm_min
         second = current_time.tm_sec
-
-        self.user_input_text_edit.setPlainText(f"라인을 가동합니다. {hour}시 {minute}분 {second}초")
+        added_text = f"라인을 중지합니다. {hour}시 {minute}분 {second}초"
+        log = self.log_text.toPlainText() + "\n" + added_text
+        self.log_text.setPlainText(log)
 
     def enter_clicked(self):
-        entered_text = self.user_input.toPlainText()
-        current_text = self.user_input_text_edit.toPlainText()
-        self.user_input_text_edit.setPlainText(current_text + "\n" + "사용자 입력: " + entered_text)
-
+        entered_text = self.user_input_text.toPlainText()
+        log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + entered_text
+        self.log_text.setPlainText(log)
 
     def update_texts(self, text1, text2):
         pass  # No update for this example
