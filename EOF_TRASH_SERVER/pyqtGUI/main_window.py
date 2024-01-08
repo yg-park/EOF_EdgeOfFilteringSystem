@@ -15,6 +15,7 @@ from utils.Inference.bottle_classifier import BottleClassifier
 from pyqtGUI.threads.rcv_audio_thread import ReceiveAudio
 from pyqtGUI.threads.rcv_img_thread import ReceiveImage
 from pyqtGUI.threads.ROI_detect_classify_thread import ClassifyTimingChecker
+from pyqtGUI.threads.audio_processing_thread import AudioProcessing
 
 
 class MainGUI(QMainWindow):
@@ -23,7 +24,7 @@ class MainGUI(QMainWindow):
         super().__init__()
         self.init_UI()  # 기본 UI틀을 생성합니다.
         self.frame_queue = queue.Queue(maxsize=30)  # 동영상 스트리밍용 queue를 생성합니다.
-        self.start_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
+        self.init_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
 
         # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
         self.timer = QTimer(self)
@@ -82,7 +83,7 @@ class MainGUI(QMainWindow):
         main_vertical_layout.addLayout(sub_horizontal_layout_2)
         self.layout.addLayout(main_vertical_layout)
 
-    def start_threads(self):
+    def init_threads(self):
         """ 프로그램 동작에 필요한 스레드들을 실행합니다
 
             video_stream_thread는
@@ -94,16 +95,24 @@ class MainGUI(QMainWindow):
             ClassifyTimingCheck_thread는
             객체가 탐지되었을 때 단한번만 분류를 실시하기 위한 스레드 입니다.
         """
+        self.process_client_audio_thread = AudioProcessing()
+        self.process_client_audio_thread.model_change_signal.connect(
+            self.change_model
+        )
+        # self.process_client_audio_thread.manual_tts_signal.connect()
+
         self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
         self.audio_recv_thread = ReceiveAudio()
-        self.audio_recv_thread.rcv_audio_signal.connect(self.do_stt)
+        self.audio_recv_thread.rcv_audio_signal.connect(
+            self.process_client_audio_thread.start
+        )
         self.audio_recv_thread.start()
 
         self.ClassifyTimingCheck_thread = ClassifyTimingChecker()
         self.ClassifyTimingCheck_thread.finished_signal.connect(
             self.send_classification_result
-            )
+        )
 
     def update_pixmap(self):
         """메인 GUI의 이미지를 업데이트 합니다."""
@@ -152,9 +161,20 @@ class MainGUI(QMainWindow):
             print("LABEL BOTTLE 결과 전송")
             self.hw_control_comm.send(message="Servo Kick")
 
-    def do_stt(self):
-        print("위스퍼를 이용하여 stt작업을 수행합니다.")
-        print("그리고 나서 모델 스위칭을 하는 것이면 어떻게 할지.. 스레드로 구성해야 할듯")
+    def change_model(self):
+        """페트병, 유리병 모델을 스위칭 합니다."""
+        if self.detector.current_target == "pet":
+            self.detector.set_model_target("glass")
+        elif self.detector.current_target == "glass":
+            self.detector.set_model_target("pet")
+
+        if self.classifier.current_target == "pet":
+            self.classifier.set_model_target("glass")
+        elif self.classifier.current_target == "glass":
+            self.classifier.set_model_target("pet")
+
+        print(f"현재 detector의 target = {self.detector.current_target}")
+        print(f"현재 classifier target = {self.classifier.current_target}")
 
     def update_text_edit(self, message):
         """메인 GUI의 텍스트박스를 업데이트 합니다."""
