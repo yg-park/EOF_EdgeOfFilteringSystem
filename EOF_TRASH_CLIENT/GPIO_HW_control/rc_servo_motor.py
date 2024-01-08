@@ -23,12 +23,12 @@ class RCServoMotor:
 
     def start(self):
         """레인을 동작시킵니다."""
+        self.running = True
         GPIO.output(self.rc_servo_1_pin, GPIO.HIGH)
         GPIO.output(self.rc_servo_2_pin, GPIO.HIGH)
-        self.running = True
 
     def stop(self):
         """레인을 정지시킵니다."""
+        self.running = False
         GPIO.output(self.rc_servo_1_pin, GPIO.LOW)
         GPIO.output(self.rc_servo_2_pin, GPIO.LOW)
-        self.running = False

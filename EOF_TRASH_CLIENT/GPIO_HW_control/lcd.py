@@ -15,5 +15,3 @@ class LCD:
 			self.lcd.write_string('    RC Stop')
 	def display_clear(self):
 		self.lcd.clear()
-myLCD = LCD()
-myLCD.display_lcd('Glass')

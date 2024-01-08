@@ -8,6 +8,7 @@ def main():
     """엔트리포인트"""
     lane_1 = LaneController()
     lane_1.execute()
+    
 
 
 if __name__ == "__main__":
