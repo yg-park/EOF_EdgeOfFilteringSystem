@@ -1,7 +1,7 @@
 """
 crop된 영상 프레임에서 target 물체를 classification 하기 위한 모듈입니다.
 """
-from Inference.otx_api import OTXAPI
+from utils.Inference.otx_api import OTXAPI
 
 
 class BottleClassifier(OTXAPI):
