@@ -160,14 +160,14 @@ class MainGUI(QMainWindow):
         second = current_time.tm_sec
         if result == 0:
             print("CLEAR BOTTLE 결과 전송")
-            added_text = f"분류결과: 정상 {hour}시 {minute}분 {second}초"
-            log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + added_text
+            added_text = f"분류결과: CLEAR {hour}시 {minute}분 {second}초"
+            log = self.log_text.toPlainText() + "\n" + added_text
             self.log_text.setPlainText(log)
         elif result == 1:
             print("LABEL BOTTLE 결과 전송")
             self.hw_control_comm.send(message="Servo Kick")
-            added_text = f"분류결과: 비정상 {hour}시 {minute}분 {second}초"
-            log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + added_text
+            added_text = f"분류결과: LABEL {hour}시 {minute}분 {second}초"
+            log = self.log_text.toPlainText() + "\n" + added_text
             self.log_text.setPlainText(log)
 
     def change_model(self):
@@ -178,19 +178,16 @@ class MainGUI(QMainWindow):
         second = current_time.tm_sec
         if self.detector.current_target == "pet":
             self.detector.set_model_target("glass")
-            added_text = f"페트병->유리병 감지. {hour}시 {minute}분 {second}초"
         elif self.detector.current_target == "glass":
             self.detector.set_model_target("pet")
-            added_text = f"유리병->페트병 감지. {hour}시 {minute}분 {second}초"
         if self.classifier.current_target == "pet":
             self.classifier.set_model_target("glass")
-            added_text = f"페트병->유리병 분류. {hour}시 {minute}분 {second}초"
+            added_text = f"페트병->유리병 {hour}시 {minute}분 {second}초"
         elif self.classifier.current_target == "glass":
             self.classifier.set_model_target("pet")
-            added_text = f"유리병->페트병 분류. {hour}시 {minute}분 {second}초"
+            added_text = f"유리병->페트병 {hour}시 {minute}분 {second}초"
         log = self.log_text.toPlainText() + "\n" + "모델 변경: " + added_text
         self.log_text.setPlainText(log)
-
         print(f"현재 detector의 target = {self.detector.current_target}")
         print(f"현재 classifier target = {self.classifier.current_target}")
 
@@ -213,7 +210,7 @@ class MainGUI(QMainWindow):
         minute = current_time.tm_min
         second = current_time.tm_sec
         added_text = f"라인을 가동합니다. {hour}시 {minute}분 {second}초"
-        log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + added_text
+        log = self.log_text.toPlainText() + "\n" + added_text
         self.log_text.setPlainText(log)
 
     def stop_line(self):
@@ -232,6 +229,7 @@ class MainGUI(QMainWindow):
         entered_text = self.user_input_text.toPlainText()
         log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + entered_text
         self.log_text.setPlainText(log)
+        self.user_input_text.setPlainText("")
 
     def update_texts(self, text1, text2):
         pass  # No update for this example
