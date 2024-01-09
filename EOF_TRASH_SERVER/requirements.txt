@@ -20,3 +20,11 @@ PyQt5==5.15.10
 
 # Speech To Text: OpenAI whisper
 openai-whisper==20231117
+
+# llama2 API 버전에 필요한 라이브러리
+pypdf==3.17.4
+faiss-gpu==1.7.2
+replicate==0.22.0
+langchain==0.1.0
+sentence_transformers==2.2.2
+unstructured==0.11.8
