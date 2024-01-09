@@ -1,11 +1,7 @@
 {
-    "type_of_model": "otx_classification",
+    "type_of_model": "Classification",
     "converter_type": "CLASSIFICATION",
     "model_parameters": {
-        "multilabel": false,
-        "hierarchical": false,
-        "multihead_class_info": {},
-        "confidence_threshold": 0.5,
         "labels": {
             "label_tree": {
                 "type": "tree",
@@ -18,7 +14,7 @@
             },
             "label_groups": [
                 {
-                    "_id": "6596127e8bc751ff8151f885",
+                    "_id": "659c909d353b19f57f230381",
                     "name": "labels",
                     "label_ids": [
                         "0",
@@ -32,14 +28,14 @@
                     "_id": "0",
                     "name": "ClearGlassBottle",
                     "color": {
-                        "red": 156,
-                        "green": 118,
-                        "blue": 242,
+                        "red": 86,
+                        "green": 186,
+                        "blue": 70,
                         "alpha": 255
                     },
                     "hotkey": "",
                     "domain": "CLASSIFICATION",
-                    "creation_date": "2024-01-04T02:05:50.612000",
+                    "creation_date": "2024-01-09T00:17:33.825000",
                     "is_empty": false,
                     "is_anomalous": false
                 },
@@ -47,14 +43,14 @@
                     "_id": "1",
                     "name": "LidGlassBottle",
                     "color": {
-                        "red": 40,
-                        "green": 75,
-                        "blue": 219,
+                        "red": 57,
+                        "green": 96,
+                        "blue": 209,
                         "alpha": 255
                     },
                     "hotkey": "",
                     "domain": "CLASSIFICATION",
-                    "creation_date": "2024-01-04T02:05:50.612000",
+                    "creation_date": "2024-01-09T00:17:33.825000",
                     "is_empty": false,
                     "is_anomalous": false
                 }
