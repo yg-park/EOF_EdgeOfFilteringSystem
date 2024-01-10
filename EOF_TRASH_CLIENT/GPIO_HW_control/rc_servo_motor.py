@@ -1,15 +1,12 @@
 """
-RC Servo Motor 를 제어하는 모듈입니다.
+RC Servo Motor를 제어하는 모듈입니다.
 """
 import RPi.GPIO as GPIO
-
-RC_SERVO_PIN1 = 20
-RC_SERVO_PIN2 = 21
 
 
 class RCServoMotor:
     """RC Servo Motor를 제어하기 위한 클래스입니다."""
-    def __init__(self):
+    def __init__(self, RC_SERVO_PIN1, RC_SERVO_PIN2):
         self.rc_servo_1_pin = RC_SERVO_PIN1
         self.rc_servo_2_pin = RC_SERVO_PIN2
         self.running = False
