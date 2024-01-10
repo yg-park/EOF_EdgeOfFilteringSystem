@@ -4,7 +4,7 @@
 import queue
 import time
 import cv2
-from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton,QLineEdit
 from PyQt5.QtGui import QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt, QTimer
 
@@ -22,7 +22,7 @@ class MainGUI(QMainWindow):
     """메인 GUI에 관한 클래스입니다."""
     def __init__(self):
         super().__init__()
-        self.init_UI()  # 기본 UI틀을 생성합니다.
+        self.init_ui()  # 기본 UI틀을 생성합니다.
         self.frame_queue = queue.Queue(maxsize=30)  # 동영상 스트리밍용 queue를 생성합니다.
         self.init_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
 
@@ -39,7 +39,7 @@ class MainGUI(QMainWindow):
         self.counter = 0
         self.on_change_model = False
 
-    def init_UI(self):
+    def init_ui(self):
         """기본 UI틀을 생성합니다."""
         self.setWindowTitle("EOF Trash - Server")
 
@@ -63,12 +63,14 @@ class MainGUI(QMainWindow):
         self.log_text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.log_scrollbar = self.log_text.verticalScrollBar()
 
-        self.user_input_text = QTextEdit(self)
-        self.user_input_text.setPlainText("User Input")
+        self.user_input_text = QLineEdit(self)
+        self.user_input_text.setPlaceholderText("사용자 입력:")
         self.user_input_text.setMaximumHeight(30)
         self.enter_clicked_btn = QPushButton('전송')
         self.enter_clicked_btn.clicked.connect(self.enter_clicked)
-
+        self.user_input_text.returnPressed.connect(
+            self.enter_clicked_btn.click)
+        
         main_vertical_layout = QVBoxLayout()
         sub_horizontal_layout_1 = QHBoxLayout()
         sub_horizontal_layout_2 = QHBoxLayout()
@@ -131,11 +133,12 @@ class MainGUI(QMainWindow):
                     = self.detector.detect_bottle(roi)
 
                 if detected:
-                    cv2.rectangle(frame,
-                                (crop_frame_coordinate[0], crop_frame_coordinate[1]),
-                                (crop_frame_coordinate[2], crop_frame_coordinate[3]),
-                                (0, 255, 0), 2)
-
+                    cv2.rectangle(
+                        frame,
+                        (crop_frame_coordinate[0], crop_frame_coordinate[1]),
+                        (crop_frame_coordinate[2], crop_frame_coordinate[3]),
+                        (0, 255, 0), 2
+                    )
                     # 트리거
                     if crop_frame_coordinate[2] > 320 and crop_frame_coordinate[2] < 480:
                         if self.ClassifyTimingCheck_thread.on_process is False:
@@ -145,10 +148,14 @@ class MainGUI(QMainWindow):
                             print("--image 들어가는중")
                             self.ClassifyTimingCheck_thread.detection_frame_list.append(
                                 (prediction_accuracy,
-                                frame[crop_frame_coordinate[1]:crop_frame_coordinate[3],
-                                    crop_frame_coordinate[0]:crop_frame_coordinate[2]])
+                                 frame[crop_frame_coordinate[1]:crop_frame_coordinate[3],
+                                       crop_frame_coordinate[0]:crop_frame_coordinate[2]])
                             )
 
+            cv2.putText(
+                frame, self.detector.current_target, (50, 100),
+                cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 255, 0), 3
+            )
             height, width, channels = frame.shape
             bytes_per_line = channels * width
             q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_BGR888)
@@ -203,14 +210,13 @@ class MainGUI(QMainWindow):
         print(f"현재 detector의 target = {self.detector.current_target}")
         print(f"현재 classifier target = {self.classifier.current_target}")
         self.on_change_model = False
-        
+
     def send_llama_output(self, message):
+        """llama2의 추론 결과를 클라이언트로 전송합니다."""
         print("text를 클라이언트로 전송합니다.")
         print("message=", message)
         remake_message = "@" + message
-        #remake_message = remake_message.strip()
         print("remake message=", remake_message)
-        #self.hw_control_comm.send(message=remake_message)
         self.hw_control_comm.send(f'@{message}')
 
     def start_lane(self):
@@ -224,9 +230,6 @@ class MainGUI(QMainWindow):
         added_text = f"라인을 가동합니다. {hour}시 {minute}분 {second}초"
         self.update_log_text(added_text)
 
-        ###### kenGwon test!!!
-        # self.change_model()
-
     def stop_lane(self):
         """라인을 중지합니다."""
         self.hw_control_comm.send(message='RC Stop')
@@ -237,17 +240,25 @@ class MainGUI(QMainWindow):
         second = current_time.tm_sec
         added_text = f"라인을 중지합니다. {hour}시 {minute}분 {second}초"
         self.update_log_text(added_text)
-        
-        ###### kenGwon test!!!
-        self.change_model()
 
     def enter_clicked(self):
-        entered_text = self.user_input_text.toPlainText()
+        """사용자 입력 전송버튼이 눌렸을 때의 동작입니다."""
+        entered_text = self.user_input_text.text()
         log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + entered_text
         self.log_text.setPlainText(log)
-        self.user_input_text.setPlainText("")
+        self.user_input_text.setText("")
+        if entered_text == "/exit":
+            self.hw_control_comm.send(entered_text)
+            print("exit logic entered")
+        elif entered_text == "/change model":
+            self.change_model()
+            self.hw_control_comm.send(f"{self.detector.current_target}")
+            print("exit logic entered")
+        else:
+            #llama로 진입
+            pass
 
-    def closeEvent(self, event):
+    def close_event(self, event):
         """어플리케이션이 종료될 때 실행중인 스레드를 종료합니다."""
         self.process_client_audio_thread.terminate()
         self.process_client_audio_thread.wait()
