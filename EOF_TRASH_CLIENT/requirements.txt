@@ -5,7 +5,11 @@
 RPi.GPIO==0.7.1
 opencv-python==4.8.1.78
 
-# 
+# 녹음관련
 PyAudio==0.2.14
 RPLCD==1.3.1
 smbus2==0.4.3
+
+# tts관련
+pygame==2.5.2
+gTTS==2.5.0
