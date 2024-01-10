@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, QTimer
 from utils.Comm.hw_control_comm import HwControlComm
 from utils.Inference.bottle_detector import BottleDetector
 from utils.Inference.bottle_classifier import BottleClassifier
+from utils.Inference.voice_inferencer import VoiceInferencer
 
 from pyqtGUI.threads.rcv_audio_thread import ReceiveAudio
 from pyqtGUI.threads.rcv_img_thread import ReceiveImage
@@ -22,22 +23,21 @@ class MainGUI(QMainWindow):
     """메인 GUI에 관한 클래스입니다."""
     def __init__(self):
         super().__init__()
-        self.init_ui()  # 기본 UI틀을 생성합니다.
+        self.on_change_model = False
         self.frame_queue = queue.Queue(maxsize=30)  # 동영상 스트리밍용 queue를 생성합니다.
-        self.init_threads()  # 프로그램 동작에 필요한 스레드를 실행합니다.
+
+        self.hw_control_comm = HwControlComm()
+        self.detector = BottleDetector()
+        self.classifier = BottleClassifier()
+        self.voice_inferencer = VoiceInferencer()
+
+        self.init_threads()
+        self.init_ui()
 
         # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_pixmap)
         self.timer.start(30)  # 초당 30프레임
-
-        self.hw_control_comm = HwControlComm()
-        self.detector = BottleDetector()
-        self.classifier = BottleClassifier()
-
-        # Counter variable
-        self.counter = 0
-        self.on_change_model = False
 
     def init_ui(self):
         """기본 UI틀을 생성합니다."""
@@ -52,11 +52,11 @@ class MainGUI(QMainWindow):
         pixmap = QPixmap("resources/idle_frame.png")
         self.image_label.setPixmap(pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio))
 
-        self.line_start_btn = QPushButton('라인 시작')
-        self.line_start_btn.clicked.connect(self.start_lane)
+        self.lane_start_btn = QPushButton('라인 시작')
+        self.lane_start_btn.clicked.connect(self.start_lane)
 
-        self.line_stop_btn = QPushButton('라인 정지')
-        self.line_stop_btn.clicked.connect(self.stop_lane)
+        self.lane_stop_btn = QPushButton('라인 정지')
+        self.lane_stop_btn.clicked.connect(self.stop_lane)
 
         self.log_text = QTextEdit(self)
         self.log_text.setPlainText("프로그램이 시작되었습니다.")
@@ -68,15 +68,14 @@ class MainGUI(QMainWindow):
         self.user_input_text.setMaximumHeight(30)
         self.enter_clicked_btn = QPushButton('전송')
         self.enter_clicked_btn.clicked.connect(self.enter_clicked)
-        self.user_input_text.returnPressed.connect(
-            self.enter_clicked_btn.click)
-        
+        self.user_input_text.returnPressed.connect(self.enter_clicked_btn.click)
+
         main_vertical_layout = QVBoxLayout()
         sub_horizontal_layout_1 = QHBoxLayout()
         sub_horizontal_layout_2 = QHBoxLayout()
 
-        sub_horizontal_layout_1.addWidget(self.line_start_btn)
-        sub_horizontal_layout_1.addWidget(self.line_stop_btn)
+        sub_horizontal_layout_1.addWidget(self.lane_start_btn)
+        sub_horizontal_layout_1.addWidget(self.lane_stop_btn)
 
         sub_horizontal_layout_2.addWidget(self.user_input_text)
         sub_horizontal_layout_2.addWidget(self.enter_clicked_btn)
@@ -99,14 +98,13 @@ class MainGUI(QMainWindow):
             ClassifyTimingCheck_thread는
             객체가 탐지되었을 때 단한번만 분류를 실시하기 위한 스레드 입니다.
         """
-        self.process_client_audio_thread = AudioProcessing()
+        self.process_client_audio_thread = AudioProcessing(self.voice_inferencer)
         self.process_client_audio_thread.model_change_signal.connect(
             self.change_model
         )
         self.process_client_audio_thread.message_signal.connect(
             self.send_llama_output
         )
-        # self.process_client_audio_thread.manual_tts_signal.connect()
 
         self.video_stream_thread = ReceiveImage(self.frame_queue)
         self.video_stream_thread.start()
@@ -116,8 +114,8 @@ class MainGUI(QMainWindow):
         )
         self.audio_recv_thread.start()
 
-        self.ClassifyTimingCheck_thread = ClassifyTimingChecker()
-        self.ClassifyTimingCheck_thread.finished_signal.connect(
+        self.classify_timing_check_thread = ClassifyTimingChecker()
+        self.classify_timing_check_thread.finished_signal.connect(
             self.send_classification_result
         )
 
@@ -141,12 +139,12 @@ class MainGUI(QMainWindow):
                     )
                     # 트리거
                     if crop_frame_coordinate[2] > 320 and crop_frame_coordinate[2] < 480:
-                        if self.ClassifyTimingCheck_thread.on_process is False:
+                        if self.classify_timing_check_thread.on_process is False:
                             print("트리거 thread start!!!")
-                            self.ClassifyTimingCheck_thread.start()
+                            self.classify_timing_check_thread.start()
                         else:
                             print("--image 들어가는중")
-                            self.ClassifyTimingCheck_thread.detection_frame_list.append(
+                            self.classify_timing_check_thread.detection_frame_list.append(
                                 (prediction_accuracy,
                                  frame[crop_frame_coordinate[1]:crop_frame_coordinate[3],
                                        crop_frame_coordinate[0]:crop_frame_coordinate[2]])
@@ -164,7 +162,7 @@ class MainGUI(QMainWindow):
                 pixmap = QPixmap.fromImage(q_image)
                 self.image_label.setPixmap(pixmap)
             else:
-                print("Invalid image data.1")
+                print("Invalid image data.")
 
     def send_classification_result(self, max_accracy_frame):
         """클라이언트로 분류process_client_audio_thread 결과를 전송합니다."""
@@ -221,7 +219,7 @@ class MainGUI(QMainWindow):
 
     def start_lane(self):
         """라인을 가동합니다."""
-        self.hw_control_comm.send(message='RC Start')
+        self.hw_control_comm.send(message="RC Start")
 
         current_time = time.localtime()
         hour = current_time.tm_hour
@@ -232,7 +230,7 @@ class MainGUI(QMainWindow):
 
     def stop_lane(self):
         """라인을 중지합니다."""
-        self.hw_control_comm.send(message='RC Stop')
+        self.hw_control_comm.send(message="RC Stop")
 
         current_time = time.localtime()
         hour = current_time.tm_hour
@@ -244,31 +242,18 @@ class MainGUI(QMainWindow):
     def enter_clicked(self):
         """사용자 입력 전송버튼이 눌렸을 때의 동작입니다."""
         entered_text = self.user_input_text.text()
-        log = self.log_text.toPlainText() + "\n" + "사용자 입력: " + entered_text
+        log = self.log_text.toPlainText() + "\n" + "- 사용자 입력: " + entered_text
         self.log_text.setPlainText(log)
         self.user_input_text.setText("")
         if entered_text == "/exit":
             self.hw_control_comm.send(entered_text)
-            print("exit logic entered")
         elif entered_text == "/change model":
             self.change_model()
             self.hw_control_comm.send(f"{self.detector.current_target}")
-            print("exit logic entered")
         else:
-            #llama로 진입
-            pass
-
-    def close_event(self, event):
-        """어플리케이션이 종료될 때 실행중인 스레드를 종료합니다."""
-        self.process_client_audio_thread.terminate()
-        self.process_client_audio_thread.wait()
-        self.ClassifyTimingCheck_thread.terminate()
-        self.ClassifyTimingCheck_thread.wait()
-        self.video_stream_thread.terminate()
-        self.video_stream_thread.wait()
-        self.audio_recv_thread.terminate()
-        self.audio_recv_thread.wait()
-        event.accept()
+            answer = self.voice_inferencer.get_llama2_answer(entered_text)
+            self.update_log_text(f"- LLAMA2응답: {answer}")
+            self.hw_control_comm.send(answer)
 
     def update_log_text(self, added_text):
         """ 텍스트 에디터에 새로운 텍스트를 추가하고,
@@ -276,3 +261,15 @@ class MainGUI(QMainWindow):
         log = self.log_text.toPlainText() + "\n" + added_text
         self.log_text.setPlainText(log)
         self.log_scrollbar.setValue(self.log_scrollbar.maximum())
+
+    def close_event(self, event):
+        """어플리케이션이 종료될 때 실행중인 스레드를 종료합니다."""
+        self.process_client_audio_thread.terminate()
+        self.process_client_audio_thread.wait()
+        self.classify_timing_check_thread.terminate()
+        self.classify_timing_check_thread.wait()
+        self.video_stream_thread.terminate()
+        self.video_stream_thread.wait()
+        self.audio_recv_thread.terminate()
+        self.audio_recv_thread.wait()
+        event.accept()
