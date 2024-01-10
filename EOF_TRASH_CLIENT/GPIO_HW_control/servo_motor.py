@@ -4,12 +4,10 @@
 import time
 import RPi.GPIO as GPIO
 
-SERVO_PIN = 23
-
 
 class ServoMotor:
     """서보모터를 제어하는 클래스입니다."""
-    def __init__(self):
+    def __init__(self, SERVO_PIN):
         self.servo_pin = SERVO_PIN
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.servo_pin, GPIO.OUT)
@@ -21,9 +19,9 @@ class ServoMotor:
         GPIO.cleanup(self.servo_pin)
 
     def kick(self):
-        """서보모터를 작동합니다."""
+        """서보모터를 작동하여 kick합니다."""
         self._set_servo_angle(45)
-        time.sleep(1)
+        time.sleep(2)
         self._set_servo_angle(0)
 
     def _set_servo_angle(self, angle):

@@ -16,14 +16,16 @@ class HWControlCommunication:
         self.socket.bind((self.ip_address, self.port))
         self.socket.listen(1)
         self.msg = ""
+        self.running = True
 
     def __del__(self):
         self.socket.close()
 
     def receive(self) -> None:
         """서버로부터 하드웨어를 제어하는 명령을 수신합니다."""
-        while True:
+        while self.running:
             print("하드웨어 제어를 기다리고 있습니다...")
             server_socket, _ = self.socket.accept()
             print(f"서버와 연결됨: {server_socket}")
             self.msg = server_socket.recv(1024).decode('utf-8')
+            print("여기는 통신부분", self.msg)
