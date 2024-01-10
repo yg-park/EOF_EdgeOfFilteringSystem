@@ -30,7 +30,6 @@ class LaneController:
 
     def __del__(self):
         self.camera.release()
-        GPIO.cleanup()
 
     def _init_comm(self):
         self.image_comm = ImageCommunication()
@@ -90,6 +89,12 @@ class LaneController:
                 self.hw_control_comm.msg = ""
                 self.servo_motor.kick()
             # 스피커 제어: 서버로부터 받은 메뉴얼 기반 text generation을 출력
+            elif self.hw_control_comm.msg == "pet":
+                self.lcd_controller.display_lcd("Pet")
+                self.hw_control_comm.msg = ""
+            elif self.hw_control_comm.msg == "glass":
+                self.lcd_controller.display_lcd("Glass")
+                self.hw_control_comm.msg = ""
             elif self.hw_control_comm.msg.startswith("@"):
                 message = self.hw_control_comm.msg[1:]
                 self.hw_control_comm.msg = ""
@@ -97,6 +102,9 @@ class LaneController:
                     target=self.speak, args=(message,),
                     daemon=True
                 ).start()
+            # 프로그램 종료
+            elif self.hw_control_comm.msg == "/exit":
+                self.exit()
 
     def send_frame_to_server(self):
         """웹캠으로부터 얻은 이미지 프레임을 서버로 전송합니다."""
@@ -125,7 +133,6 @@ class LaneController:
         """서버로부터 받은 문자열을 TTS하여 스피커로 출력합니다."""
         print("받은 문자", text)
         tts = gTTS(text=text, lang="ko")
-        #tts = gTTS(text=text)
         tts.save("resources/text_to_speech.mp3")
 
         pygame.mixer.init()
@@ -136,19 +143,14 @@ class LaneController:
 
     def execute(self):
         """스레드를 실행시킵니다."""
-        try:
-            self.webcam_thread.start()
-            self.listen_hw_control_thread.start()
-            self.hw_control_thread.start()
-        except KeyboardInterrupt:
-            self.exit()
-            print("except발생")
-        finally:
-            self.webcam_thread.join()
-            self.listen_hw_control_thread.join()
-            self.hw_control_thread.join()
+        self.webcam_thread.start()
+        self.listen_hw_control_thread.start()
+        self.hw_control_thread.start()
+        self.hw_control_thread.join()
+        self.listen_hw_control_thread.join()
+        self.webcam_thread.join()
 
     def exit(self):
-        self.hw_ctrl_thread_running = False
         self.send_frame_thread_running = False
         self.hw_control_comm.running = False
+        self.hw_ctrl_thread_running = False
