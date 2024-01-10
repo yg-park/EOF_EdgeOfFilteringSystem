@@ -12,12 +12,14 @@ from langchain.chains import ConversationalRetrievalChain
 import whisper
 from PyQt5.QtCore import QThread, pyqtSignal
 
+LLAMA2_7B_CHAT = 'meta/llama-2-7b-chat:13c3cdee13ee059ab779f0291d29054dab00a47dad8261375654de5540165fb0'
 LLAMA2_7B = "meta/llama-2-7b:77dde5d6c56598691b9008f7d123a18d98f40e4b4978f8a72215ebfc2553ddd8"
 REPLICATE_API_TOKEN = 'r8_FC0oSTN78VxAqc8cWbMUSUhJADRPvtG2zFyNu'
 
 
 class AudioProcessing(QThread):
     """ㅇ"""
+    message_signal = pyqtSignal(str)
     model_change_signal = pyqtSignal()
     manual_tts_signal = pyqtSignal()
 
@@ -44,6 +46,10 @@ class AudioProcessing(QThread):
 
             if model_change_flag:
                 self.model_change_signal.emit()
+            
+            #stt_text = stt["text"].strip()
+            #print(stt_text)
+            self.message_signal.emit(stt["text"])
 
         elif stt["language"] == "en":
             stt_text = stt["text"].strip()
@@ -51,12 +57,13 @@ class AudioProcessing(QThread):
             self.llama2_inference(stt_text)
 
     def llama2_inference(self, text):
+        print("라마로 들어왔다")
         # API
         os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
 
         # 모델 준비
         llama_model = Replicate(
-            model=LLAMA2_7B,
+            model=LLAMA2_7B_CHAT,
             model_kwargs={"temperature": 0.95,"top_p": 0.95, "max_new_tokens":500}
         )
 
@@ -88,3 +95,4 @@ class AudioProcessing(QThread):
         response = response[:response.find('\n')]
 
         print(f"Answer: {response}")
+        self.message_signal.emit(response) 
