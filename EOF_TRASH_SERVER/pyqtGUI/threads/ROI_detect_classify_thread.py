@@ -26,5 +26,7 @@ class ClassifyTimingChecker(QThread):
         (_, cropped_frame) = max(self.detection_frame_list, key=lambda x: x[0])
         self.detection_frame_list.clear()
         self.on_process = False
+
+        self.msleep(2500)
         self.finished_signal.emit(cropped_frame)
         print("Thread finished")

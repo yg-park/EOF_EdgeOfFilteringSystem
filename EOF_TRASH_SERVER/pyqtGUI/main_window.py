@@ -37,6 +37,7 @@ class MainGUI(QMainWindow):
 
         # Counter variable
         self.counter = 0
+        self.on_change_model = False
 
     def init_UI(self):
         """기본 UI틀을 생성합니다."""
@@ -52,14 +53,15 @@ class MainGUI(QMainWindow):
         self.image_label.setPixmap(pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio))
 
         self.line_start_btn = QPushButton('라인 시작')
-        self.line_start_btn.clicked.connect(self.operate_line)
+        self.line_start_btn.clicked.connect(self.start_lane)
 
         self.line_stop_btn = QPushButton('라인 정지')
-        self.line_stop_btn.clicked.connect(self.stop_line)
+        self.line_stop_btn.clicked.connect(self.stop_lane)
 
         self.log_text = QTextEdit(self)
-        self.log_text.setPlainText("Log")
+        self.log_text.setPlainText("프로그램이 시작되었습니다.")
         self.log_text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.log_scrollbar = self.log_text.verticalScrollBar()
 
         self.user_input_text = QTextEdit(self)
         self.user_input_text.setPlainText("User Input")
@@ -99,6 +101,9 @@ class MainGUI(QMainWindow):
         self.process_client_audio_thread.model_change_signal.connect(
             self.change_model
         )
+        self.process_client_audio_thread.message_signal.connect(
+            self.send_llama_output
+        )
         # self.process_client_audio_thread.manual_tts_signal.connect()
 
         self.video_stream_thread = ReceiveImage(self.frame_queue)
@@ -119,27 +124,30 @@ class MainGUI(QMainWindow):
         if not self.frame_queue.empty():
             frame = self.frame_queue.get()
 
-            # roi = frame[80:400, :]
-            (detected, prediction_accuracy, crop_frame_coordinate) \
-                = self.detector.detect_bottle(frame)
+            if not self.on_change_model:  # 모델 스위칭 도중에 프레임 떨어지는 문제 방지
+                roi_offset = 100
+                roi = frame[roi_offset:480-roi_offset, :]
+                (detected, prediction_accuracy, crop_frame_coordinate) \
+                    = self.detector.detect_bottle(roi)
 
-            if detected:
-                cv2.rectangle(frame,
-                              (crop_frame_coordinate[0], crop_frame_coordinate[1]),
-                              (crop_frame_coordinate[2], crop_frame_coordinate[3]),
-                              (0, 255, 0), 2)
+                if detected:
+                    cv2.rectangle(frame,
+                                (crop_frame_coordinate[0], crop_frame_coordinate[1]),
+                                (crop_frame_coordinate[2], crop_frame_coordinate[3]),
+                                (0, 255, 0), 2)
 
-                # 트리거
-                if crop_frame_coordinate[2] > 320 and crop_frame_coordinate[2] < 480:
-                    if self.ClassifyTimingCheck_thread.on_process is False:
-                        self.ClassifyTimingCheck_thread.start()
-                    else:
-                        print("--image 들어가는중")
-                        self.ClassifyTimingCheck_thread.detection_frame_list.append(
-                            (prediction_accuracy,
-                             frame[crop_frame_coordinate[1]:crop_frame_coordinate[3],
-                                   crop_frame_coordinate[0]:crop_frame_coordinate[2]])
-                        )
+                    # 트리거
+                    if crop_frame_coordinate[2] > 320 and crop_frame_coordinate[2] < 480:
+                        if self.ClassifyTimingCheck_thread.on_process is False:
+                            print("트리거 thread start!!!")
+                            self.ClassifyTimingCheck_thread.start()
+                        else:
+                            print("--image 들어가는중")
+                            self.ClassifyTimingCheck_thread.detection_frame_list.append(
+                                (prediction_accuracy,
+                                frame[crop_frame_coordinate[1]:crop_frame_coordinate[3],
+                                    crop_frame_coordinate[0]:crop_frame_coordinate[2]])
+                            )
 
             height, width, channels = frame.shape
             bytes_per_line = channels * width
@@ -152,56 +160,60 @@ class MainGUI(QMainWindow):
                 print("Invalid image data.1")
 
     def send_classification_result(self, max_accracy_frame):
-        """클라이언트로 분류 결과를 전송합니다."""
+        """클라이언트로 분류process_client_audio_thread 결과를 전송합니다."""
         result = self.classifier.classify_bottle(max_accracy_frame)
         current_time = time.localtime()
         hour = current_time.tm_hour
         minute = current_time.tm_min
         second = current_time.tm_sec
+
         if result == 0:
             print("CLEAR BOTTLE 결과 전송")
             added_text = f"분류결과: CLEAR {hour}시 {minute}분 {second}초"
-            log = self.log_text.toPlainText() + "\n" + added_text
-            self.log_text.setPlainText(log)
+            self.update_log_text(added_text)
         elif result == 1:
             print("LABEL BOTTLE 결과 전송")
             self.hw_control_comm.send(message="Servo Kick")
             added_text = f"분류결과: LABEL {hour}시 {minute}분 {second}초"
-            log = self.log_text.toPlainText() + "\n" + added_text
-            self.log_text.setPlainText(log)
+            self.update_log_text(added_text)
 
     def change_model(self):
         """페트병, 유리병 모델을 스위칭 합니다."""
+        print("페트병, 유리병 모델을 스위칭 합니다")
+        self.on_change_model = True
+
         current_time = time.localtime()
         hour = current_time.tm_hour
         minute = current_time.tm_min
         second = current_time.tm_sec
-        if self.detector.current_target == "pet":
+
+        if self.detector.current_target == "pet" \
+                and self.classifier.current_target == "pet":
             self.detector.set_model_target("glass")
-        elif self.detector.current_target == "glass":
-            self.detector.set_model_target("pet")
-        if self.classifier.current_target == "pet":
             self.classifier.set_model_target("glass")
-            added_text = f"페트병->유리병 {hour}시 {minute}분 {second}초"
-        elif self.classifier.current_target == "glass":
+            added_text = f"모델 변경: 페트병->유리병 {hour}시 {minute}분 {second}초"
+            self.update_log_text(added_text)
+        elif self.detector.current_target == "glass" \
+                and self.classifier.current_target == "glass":
+            self.detector.set_model_target("pet")
             self.classifier.set_model_target("pet")
-            added_text = f"유리병->페트병 {hour}시 {minute}분 {second}초"
-        log = self.log_text.toPlainText() + "\n" + "모델 변경: " + added_text
-        self.log_text.setPlainText(log)
+            added_text = f"모델 변경: 유리병->페트병 {hour}시 {minute}분 {second}초"
+            self.update_log_text(added_text)
+
         print(f"현재 detector의 target = {self.detector.current_target}")
         print(f"현재 classifier target = {self.classifier.current_target}")
+        self.on_change_model = False
+        
+    def send_llama_output(self, message):
+        print("text를 클라이언트로 전송합니다.")
+        print("message=", message)
+        remake_message = "@" + message
+        #remake_message = remake_message.strip()
+        print("remake message=", remake_message)
+        #self.hw_control_comm.send(message=remake_message)
+        self.hw_control_comm.send(f'@{message}')
 
-    def update_text_edit(self, message):
-        """메인 GUI의 텍스트박스를 업데이트 합니다."""
-        main_layout = self.layout.itemAt(0)
-        if main_layout:
-            sub_layout = main_layout.itemAt(0)
-            if sub_layout:
-                text_edit_item = sub_layout.itemAt(1)
-                if text_edit_item and text_edit_item.widget():
-                    text_edit_item.widget().append(message)
-
-    def operate_line(self):
+    def start_lane(self):
         """라인을 가동합니다."""
         self.hw_control_comm.send(message='RC Start')
 
@@ -210,10 +222,12 @@ class MainGUI(QMainWindow):
         minute = current_time.tm_min
         second = current_time.tm_sec
         added_text = f"라인을 가동합니다. {hour}시 {minute}분 {second}초"
-        log = self.log_text.toPlainText() + "\n" + added_text
-        self.log_text.setPlainText(log)
+        self.update_log_text(added_text)
 
-    def stop_line(self):
+        ###### kenGwon test!!!
+        # self.change_model()
+
+    def stop_lane(self):
         """라인을 중지합니다."""
         self.hw_control_comm.send(message='RC Stop')
 
@@ -222,8 +236,10 @@ class MainGUI(QMainWindow):
         minute = current_time.tm_min
         second = current_time.tm_sec
         added_text = f"라인을 중지합니다. {hour}시 {minute}분 {second}초"
-        log = self.log_text.toPlainText() + "\n" + added_text
-        self.log_text.setPlainText(log)
+        self.update_log_text(added_text)
+        
+        ###### kenGwon test!!!
+        self.change_model()
 
     def enter_clicked(self):
         entered_text = self.user_input_text.toPlainText()
@@ -231,13 +247,21 @@ class MainGUI(QMainWindow):
         self.log_text.setPlainText(log)
         self.user_input_text.setPlainText("")
 
-    def update_texts(self, text1, text2):
-        pass  # No update for this example
-
     def closeEvent(self, event):
         """어플리케이션이 종료될 때 실행중인 스레드를 종료합니다."""
-        self.video_stream_thread.quit()
+        self.process_client_audio_thread.terminate()
+        self.process_client_audio_thread.wait()
+        self.ClassifyTimingCheck_thread.terminate()
+        self.ClassifyTimingCheck_thread.wait()
+        self.video_stream_thread.terminate()
         self.video_stream_thread.wait()
-        self.audio_recv_thread.quit()
+        self.audio_recv_thread.terminate()
         self.audio_recv_thread.wait()
         event.accept()
+
+    def update_log_text(self, added_text):
+        """ 텍스트 에디터에 새로운 텍스트를 추가하고,
+        수직 스크롤바를 아래로 이동하여 가장 최근에 추가된 텍스트가 보이도록 합니다."""
+        log = self.log_text.toPlainText() + "\n" + added_text
+        self.log_text.setPlainText(log)
+        self.log_scrollbar.setValue(self.log_scrollbar.maximum())

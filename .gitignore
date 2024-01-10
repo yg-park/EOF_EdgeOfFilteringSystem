@@ -1,8 +1,3 @@
-# 모델 학습용 데이터 폴더는 깃 업로드 제외 @권강현
-ArtificialNeuralNetwork/data/*
-ArtificialNeuralNetwork/data_from_AI_Hub/*
-
-
 # 파이썬 가상환경 폴더는 깃 업로드 제외 @권강현
 EOF_TRASH_SERVER/.server_venv/*
 EOF_TRASH_CLIENT/.client_venv/*
