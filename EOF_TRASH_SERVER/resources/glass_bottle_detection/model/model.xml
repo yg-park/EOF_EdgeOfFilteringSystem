@@ -35940,7 +35940,7 @@
 		</conversion_parameters>
 		<legacy_frontend value="False" />
 		<model_info>
-			<confidence_threshold value="0.4" />
+			<confidence_threshold value="0.32500000000000007" />
 			<iou_threshold value="0.5" />
 			<label_ids value="0" />
 			<labels value="glass_bottle" />
