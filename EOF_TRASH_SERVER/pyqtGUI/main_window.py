@@ -101,6 +101,9 @@ class MainGUI(QMainWindow):
         self.process_client_audio_thread.model_change_signal.connect(
             self.change_model
         )
+        self.process_client_audio_thread.message_signal.connect(
+            self.send_llama_output
+        )
         # self.process_client_audio_thread.manual_tts_signal.connect()
 
         self.video_stream_thread = ReceiveImage(self.frame_queue)
@@ -122,9 +125,10 @@ class MainGUI(QMainWindow):
             frame = self.frame_queue.get()
 
             if not self.on_change_model:  # 모델 스위칭 도중에 프레임 떨어지는 문제 방지
-                # roi = frame[80:400, :]
+                roi_offset = 100
+                roi = frame[roi_offset:480-roi_offset, :]
                 (detected, prediction_accuracy, crop_frame_coordinate) \
-                    = self.detector.detect_bottle(frame)
+                    = self.detector.detect_bottle(roi)
 
                 if detected:
                     cv2.rectangle(frame,
@@ -135,6 +139,7 @@ class MainGUI(QMainWindow):
                     # 트리거
                     if crop_frame_coordinate[2] > 320 and crop_frame_coordinate[2] < 480:
                         if self.ClassifyTimingCheck_thread.on_process is False:
+                            print("트리거 thread start!!!")
                             self.ClassifyTimingCheck_thread.start()
                         else:
                             print("--image 들어가는중")
@@ -155,13 +160,13 @@ class MainGUI(QMainWindow):
                 print("Invalid image data.1")
 
     def send_classification_result(self, max_accracy_frame):
-        """클라이언트로 분류 결과를 전송합니다."""
+        """클라이언트로 분류process_client_audio_thread 결과를 전송합니다."""
         result = self.classifier.classify_bottle(max_accracy_frame)
         current_time = time.localtime()
         hour = current_time.tm_hour
         minute = current_time.tm_min
         second = current_time.tm_sec
-        
+
         if result == 0:
             print("CLEAR BOTTLE 결과 전송")
             added_text = f"분류결과: CLEAR {hour}시 {minute}분 {second}초"
@@ -174,6 +179,7 @@ class MainGUI(QMainWindow):
 
     def change_model(self):
         """페트병, 유리병 모델을 스위칭 합니다."""
+        print("페트병, 유리병 모델을 스위칭 합니다")
         self.on_change_model = True
 
         current_time = time.localtime()
@@ -181,18 +187,31 @@ class MainGUI(QMainWindow):
         minute = current_time.tm_min
         second = current_time.tm_sec
 
-        if self.detector.current_target == "pet":
+        if self.detector.current_target == "pet" \
+                and self.classifier.current_target == "pet":
             self.detector.set_model_target("glass")
-            added_text = f"페트병->유리병 {hour}시 {minute}분 {second}초"
+            self.classifier.set_model_target("glass")
+            added_text = f"모델 변경: 페트병->유리병 {hour}시 {minute}분 {second}초"
             self.update_log_text(added_text)
-        elif self.detector.current_target == "glass":
+        elif self.detector.current_target == "glass" \
+                and self.classifier.current_target == "glass":
             self.detector.set_model_target("pet")
-            added_text = f"유리병->페트병 {hour}시 {minute}분 {second}초"
+            self.classifier.set_model_target("pet")
+            added_text = f"모델 변경: 유리병->페트병 {hour}시 {minute}분 {second}초"
             self.update_log_text(added_text)
 
         print(f"현재 detector의 target = {self.detector.current_target}")
         print(f"현재 classifier target = {self.classifier.current_target}")
         self.on_change_model = False
+        
+    def send_llama_output(self, message):
+        print("text를 클라이언트로 전송합니다.")
+        print("message=", message)
+        remake_message = "@" + message
+        #remake_message = remake_message.strip()
+        print("remake message=", remake_message)
+        #self.hw_control_comm.send(message=remake_message)
+        self.hw_control_comm.send(f'@{message}')
 
     def start_lane(self):
         """라인을 가동합니다."""
@@ -205,7 +224,8 @@ class MainGUI(QMainWindow):
         added_text = f"라인을 가동합니다. {hour}시 {minute}분 {second}초"
         self.update_log_text(added_text)
 
-        self.change_model()  ################# test kenGwon
+        ###### kenGwon test!!!
+        # self.change_model()
 
     def stop_lane(self):
         """라인을 중지합니다."""
@@ -217,8 +237,9 @@ class MainGUI(QMainWindow):
         second = current_time.tm_sec
         added_text = f"라인을 중지합니다. {hour}시 {minute}분 {second}초"
         self.update_log_text(added_text)
-
-        self.change_model()  ################# test kenGwon
+        
+        ###### kenGwon test!!!
+        self.change_model()
 
     def enter_clicked(self):
         entered_text = self.user_input_text.toPlainText()
@@ -228,9 +249,13 @@ class MainGUI(QMainWindow):
 
     def closeEvent(self, event):
         """어플리케이션이 종료될 때 실행중인 스레드를 종료합니다."""
-        self.video_stream_thread.quit()
+        self.process_client_audio_thread.terminate()
+        self.process_client_audio_thread.wait()
+        self.ClassifyTimingCheck_thread.terminate()
+        self.ClassifyTimingCheck_thread.wait()
+        self.video_stream_thread.terminate()
         self.video_stream_thread.wait()
-        self.audio_recv_thread.quit()
+        self.audio_recv_thread.terminate()
         self.audio_recv_thread.wait()
         event.accept()
 

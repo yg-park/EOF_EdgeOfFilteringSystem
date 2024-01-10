@@ -69,6 +69,8 @@ class BottleDetector(OTXAPI):
             box_width = frame_width * prediction.shape.width
             box_height = frame_height * prediction.shape.height
 
+            box_y1 += 100
+
             prediction_accuracy = prediction.get_labels()[-1].probability * 100
             crop_frame_coordinate = (int(box_x1), int(box_y1),
                                      int(box_x1+box_width),
