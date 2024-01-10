@@ -1,6 +1,7 @@
 """
 하드웨어를 제어하는 통신을 담당하는 모듈입니다.
 """
+import time
 import socket
 
 IP_ADDRESS = "10.10.15.200"
@@ -28,4 +29,5 @@ class HWControlCommunication:
             server_socket, _ = self.socket.accept()
             print(f"서버와 연결됨: {server_socket}")
             self.msg = server_socket.recv(1024).decode('utf-8')
-            print("여기는 통신부분", self.msg)
+            print("서버로부터 받은 메시지: ", self.msg)
+            time.sleep(0.1)
