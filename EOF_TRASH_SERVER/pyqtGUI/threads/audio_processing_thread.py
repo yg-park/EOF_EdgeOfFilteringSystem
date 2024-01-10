@@ -30,5 +30,18 @@ class AudioProcessing(QThread):
         if model_change_flag:
             self.model_change_signal.emit()
         else:
-            answer = self.get_llama2_answer(stt)
+            answer = self.voice_inferencer.get_llama2_answer(stt)
             self.message_signal.emit(answer)
+
+
+class TextProcessing(QThread):
+    finished_signal = pyqtSignal(str)
+
+    def __init__(self, voice_inferencer):
+        super().__init__()
+        self.voice_inferencer = voice_inferencer
+        self.target_text = None
+
+    def run(self):
+        answer = self.voice_inferencer.get_llama2_answer(self.target_text)
+        self.finished_signal.emit(answer)
