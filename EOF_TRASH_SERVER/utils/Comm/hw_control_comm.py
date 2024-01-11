@@ -4,17 +4,12 @@
 import socket
 
 
-IP_ADDRESS = "10.10.15.200"
-STRING_SEND_PORT = 6666
-
-
 class HwControlComm():
     """하드웨어를 제어하기 위한 통신 클래스입니다."""
-    def __init__(self):
-        self.ip_address = IP_ADDRESS
-        self.port = STRING_SEND_PORT
-
-    # def __del__(self):
+    def __init__(self, ip_address, port):
+        self.ip_address = ip_address
+        self.port = port
+        print("HwControlComm 제대로 init완료")
 
     def send(self, message) -> None:
         """ 하드웨어를 제어할 명령을 보냅니다.

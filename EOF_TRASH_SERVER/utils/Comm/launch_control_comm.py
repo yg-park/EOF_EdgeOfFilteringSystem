@@ -9,6 +9,12 @@ class LaunchControlComm():
     def __init__(self, ip_address, port):
         self.ip_address = ip_address
         self.port = port
+        print("LaunchControlComm 제대로 init완료")
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    def __del__(self):
+        self.client_socket.close()
+        print("LaunchControlComm소켓 반환 되었는가?")
 
     def activate(self) -> None:
         """ 하드웨어를 제어할 명령을 보냅니다.
@@ -17,8 +23,8 @@ class LaunchControlComm():
         """
         print("여기 들어오는거 맞아??")
         message = "/activate lane1"
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((self.ip_address, self.port))
-        client_socket.sendall(message.encode('utf-8'))
-        client_socket.close()
+        
+        self.client_socket.connect((self.ip_address, self.port))
+        self.client_socket.sendall(message.encode('utf-8'))
+        self.client_socket.close()
         print("맞냐고?")

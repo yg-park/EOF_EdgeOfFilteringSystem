@@ -35,6 +35,7 @@ class AudioProcessing(QThread):
 
 
 class TextProcessing(QThread):
+    """whisper가 생성한 텍스트를 가지고 llama2 모델에 추론합니다."""
     finished_signal = pyqtSignal(str)
 
     def __init__(self, voice_inferencer):
@@ -43,5 +44,6 @@ class TextProcessing(QThread):
         self.target_text = None
 
     def run(self):
+        """whisper가 생성한 텍스트를 가지고 llama2 모델에 추론합니다."""
         answer = self.voice_inferencer.get_llama2_answer(self.target_text)
         self.finished_signal.emit(answer)

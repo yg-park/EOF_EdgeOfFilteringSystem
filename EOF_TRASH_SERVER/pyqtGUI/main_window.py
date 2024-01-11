@@ -3,6 +3,8 @@
 """
 import queue
 import time
+import configparser
+
 import cv2
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton,QLineEdit
 from PyQt5.QtGui import QPixmap, QFont, QImage
@@ -13,7 +15,6 @@ from utils.Comm.hw_control_comm import HwControlComm
 from utils.Inference.bottle_detector import BottleDetector
 from utils.Inference.bottle_classifier import BottleClassifier
 from utils.Inference.voice_inferencer import VoiceInferencer
-
 from pyqtGUI.threads.rcv_audio_thread import ReceiveAudio
 from pyqtGUI.threads.rcv_img_thread import ReceiveImage
 from pyqtGUI.threads.ROI_detect_classify_thread import ClassifyTimingChecker
@@ -22,24 +23,37 @@ from pyqtGUI.threads.audio_processing_thread import AudioProcessing, TextProcess
 
 class MainGUI(QMainWindow):
     """메인 GUI에 관한 클래스입니다."""
+    config = configparser.ConfigParser()
+    config.read("resources/communication_config.ini")
+
     def __init__(self):
         super().__init__()
         self.on_change_model = False
         self.frame_queue = queue.Queue(maxsize=30)  # 동영상 스트리밍용 queue를 생성합니다.
-        self.launch_control = LaunchControlComm("10.10.15.200", 9999)
-        self.hw_control_comm = HwControlComm()
+        self.launch_control = None
+        self.hw_control_comm = None
+        self.video_stream_thread = None
+        self.audio_recv_thread = None
+        self.init_basic_instance()
+        self.init_ui()
+
+    def init_basic_instance(self):
+        """프로그램 동작에 필요한 기본 인스턴스를 초기화 합니다."""
         self.detector = BottleDetector()
         self.classifier = BottleClassifier()
         self.voice_inferencer = VoiceInferencer()
 
-        self.init_threads()
-        self.init_ui()
+        self.process_client_audio_thread = AudioProcessing(self.voice_inferencer)
+        self.process_client_audio_thread.model_change_signal.connect(self.change_model)
+        self.process_client_audio_thread.message_signal.connect(self.send_llama_output)
+        self.process_textbox_input_thread = TextProcessing(self.voice_inferencer)
+        self.process_textbox_input_thread.finished_signal.connect(self.update_log_text)
+        self.classify_timing_check_thread = ClassifyTimingChecker()
+        self.classify_timing_check_thread.finished_signal.connect(self.send_classification_result)
 
-        # 일정한 프레임으로 영상 출력을 위한 타이머를 초기화합니다.
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_pixmap)
-        # self.timer.start(30)  # 초당 30프레임
-    
+        self.frame_refresh_timer = QTimer(self)
+        self.frame_refresh_timer.timeout.connect(self.update_pixmap)
+
     def init_ui(self):
         """기본 UI틀을 생성합니다."""
         self.setWindowTitle("EOF Trash - Server")
@@ -87,52 +101,56 @@ class MainGUI(QMainWindow):
         main_vertical_layout.addLayout(sub_horizontal_layout_2)
         self.layout.addLayout(main_vertical_layout)
 
-    def init_threads(self):
-        """ 프로그램 동작에 필요한 스레드들을 실행합니다
-
-        process_client_audio_thread는
-        클라이언트로부터 받은 음성을 전처리하는 스레드 입니다.
-
-        video_stream_thread는
-        클라이언트로부터 영상을 송신받는 스레드 입니다.
-
-        audio_recv_thread는
-        클라이언트로부터 음성을 송신받는 스레드 입니다.
-
-        ClassifyTimingCheck_thread는
-        객체가 탐지되었을 때 단한번만 분류를 실시하기 위한 스레드 입니다.
-        """
-        self.process_client_audio_thread = AudioProcessing(self.voice_inferencer)
-        self.process_client_audio_thread.model_change_signal.connect(
-            self.change_model
+    def activate_lane(self, str_lane_num):
+        """레인 객체 하나를 실행합니다.(원래는 클래스화가 필요함)"""
+        self.launch_control = LaunchControlComm(
+            self.config["IP"]["LANE_1"],
+            int(self.config["PORT"]["LAUNCH_CONTROL_PORT"])
         )
-        self.process_client_audio_thread.message_signal.connect(
-            self.send_llama_output
-        )
-        self.process_textbox_input_thread = TextProcessing(
-            self.voice_inferencer
-        )
-        self.process_textbox_input_thread.finished_signal.connect(
-            self.update_log_text
+        self.hw_control_comm = HwControlComm(
+            self.config["IP"][str_lane_num],
+            int(self.config["PORT"]["STRING_PORT"])
         )
 
-        self.video_stream_thread = ReceiveImage(self.frame_queue)
-        self.video_stream_thread.start()
-        self.audio_recv_thread = ReceiveAudio()
+        self.audio_recv_thread = ReceiveAudio(
+            self.config["IP"]["SERVER"],
+            int(self.config["PORT"]["AUDIO_PORT"])
+        )
         self.audio_recv_thread.rcv_audio_signal.connect(
             self.process_client_audio_thread.start
         )
         self.audio_recv_thread.start()
 
-        self.classify_timing_check_thread = ClassifyTimingChecker()
-        self.classify_timing_check_thread.finished_signal.connect(
-            self.send_classification_result
+        self.video_stream_thread = ReceiveImage(
+            self.frame_queue,
+            self.config["IP"]["SERVER"],
+            int(self.config["PORT"]["IMAGE_PORT"])
         )
+        self.video_stream_thread.start()
+
+        self.frame_refresh_timer.start(30)  # 초당 30FPS
+        self.launch_control.activate()
+
+    def deactivate_lane(self):
+        """레인 객체 하나를 종료합니다.(원래는 클래스화가 필요함)"""
+        self.hw_control_comm.send("/exit")
+
+        del self.launch_control
+        del self.hw_control_comm
+
+        self.video_stream_thread.stop()
+        self.video_stream_thread.quit()
+        del self.video_stream_thread
+
+        self.audio_recv_thread.stop()
+        self.audio_recv_thread.quit()
+        del self.audio_recv_thread
+
+        self.frame_refresh_timer.stop()
+        self.frame_queue.queue.clear()
 
     def update_pixmap(self):
         """메인 GUI의 이미지를 업데이트 합니다."""
-        print("asdf")
-        
         if not self.frame_queue.empty():
             frame = self.frame_queue.get()
 
@@ -261,17 +279,13 @@ class MainGUI(QMainWindow):
 
         # 명령어 입력인 경우
         if entered_text.startswith("/"):
-            if entered_text[1:] == "activate lane1":
-                self.launch_control.activate()
-                self.timer.start(30)  # 초당 30프레임
-            elif entered_text[1:] == "exit":
-                self.hw_control_comm.send(entered_text)
-                self.video_stream_thread.terminate()
-                self.timer.stop()
-                self.frame_queue.queue.clear()
+            if entered_text == "/activate lane1":
+                self.activate_lane("LANE_1")
+            elif entered_text == "/exit":
+                self.deactivate_lane()
                 pixmap = QPixmap("resources/idle_frame.png")
                 self.image_label.setPixmap(pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio))
-            elif entered_text[1:] == "change model":
+            elif entered_text[1:] == "/change model":
                 self.change_model()
                 self.hw_control_comm.send(f"{self.detector.current_target}")
         # 자연어 입력인 경우
