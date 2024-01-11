@@ -14,6 +14,7 @@ class HWControlCommunication:
         self.ip_address = IP_ADDRESS
         self.port = PORT
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         self.socket.bind((self.ip_address, self.port))
         self.socket.listen(1)
         self.msg = ""

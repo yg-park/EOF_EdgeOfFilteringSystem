@@ -18,12 +18,6 @@ class ServoMotor:
         self.pwm.stop()
         GPIO.cleanup(self.servo_pin)
 
-    def kick(self):
-        """서보모터를 작동하여 kick합니다."""
-        self._set_servo_angle(45)
-        time.sleep(2)
-        self._set_servo_angle(0)
-
     def _set_servo_angle(self, angle):
         duty_cycle = (angle / 18) + 2  # 각도를 PWM 듀티 사이클로 변환
         GPIO.output(self.servo_pin, True)
@@ -31,3 +25,9 @@ class ServoMotor:
         time.sleep(0.2)  # 1초 대기 (서보 모터가 동작할 시간)
         GPIO.output(self.servo_pin, False)
         self.pwm.ChangeDutyCycle(0)
+
+    def kick(self):
+        """서보모터를 작동하여 kick합니다."""
+        self._set_servo_angle(45)
+        time.sleep(2)
+        self._set_servo_angle(0)
