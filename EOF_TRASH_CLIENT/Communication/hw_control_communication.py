@@ -4,15 +4,12 @@
 import time
 import socket
 
-IP_ADDRESS = "10.10.15.200"
-PORT = 6666
-
 
 class HWControlCommunication:
     """하드웨어 제어를 위한 통신 클래스입니다."""
-    def __init__(self):
-        self.ip_address = IP_ADDRESS
-        self.port = PORT
+    def __init__(self, ip_address, port):
+        self.ip_address = ip_address
+        self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         self.socket.bind((self.ip_address, self.port))

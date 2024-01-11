@@ -3,15 +3,12 @@
 """
 import socket
 
-IP_ADDRESS = "10.10.15.58"
-PORT = 7777
-
 
 class AudioCommunication:
     """오디오 파일을 통신하기 위한 클래스입니다."""
-    def __init__(self):
-        self.ip_address = IP_ADDRESS
-        self.port = PORT
+    def __init__(self, ip_address, port):
+        self.ip_address = ip_address
+        self.port = port
 
     def __del__(self):
         self.client_socket.close()

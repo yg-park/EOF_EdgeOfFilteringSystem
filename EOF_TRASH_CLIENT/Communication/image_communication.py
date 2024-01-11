@@ -5,15 +5,12 @@ import cv2
 import socket
 import struct
 
-IP_ADDRESS = "10.10.15.58"
-PORT = 5555
-
 
 class ImageCommunication:
     """영상을 통신하기 위한 클래스입니다."""
-    def __init__(self):
-        self.ip_address = IP_ADDRESS
-        self.port = PORT
+    def __init__(self, ip_address, port):
+        self.ip_address = ip_address
+        self.port = port
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((self.ip_address, self.port))
 

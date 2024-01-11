@@ -3,6 +3,7 @@
 """
 import time
 import threading
+import configparser
 
 import cv2
 import pygame
@@ -21,6 +22,11 @@ from Audio.voice_record import AudioRecorder
 
 class LaneController:
     """재활용 쓰레기 분류라인을 제어하기 위한 클래스입니다."""
+    tcp_config = configparser.ConfigParser()
+    gpio_config = configparser.ConfigParser()
+    tcp_config.read("resources/communication_config.ini")
+    gpio_config.read("resources/gpio_config.ini")
+
     def __init__(self):
         self.hw_ctrl_thread_running = True
         self.send_frame_thread_running = True
@@ -32,20 +38,34 @@ class LaneController:
         self.camera.release()
 
     def _init_comm(self):
-        self.image_comm = ImageCommunication()
-        self.audio_comm = AudioCommunication()
-        self.hw_control_comm = HWControlCommunication()
+        self.image_comm = ImageCommunication(
+            self.tcp_config["IP"]["SERVER"],
+            int(self.tcp_config["PORT"]["IMAGE_PORT"])
+        )
+        self.audio_comm = AudioCommunication(
+            self.tcp_config["IP"]["SERVER"],
+            int(self.tcp_config["PORT"]["AUDIO_PORT"])
+        )
+        self.hw_control_comm = HWControlCommunication(
+            self.tcp_config["IP"]["LANE_1"],
+            int(self.tcp_config["PORT"]["STRING_PORT"])
+        )
 
     def _init_hw(self):
         GPIO.cleanup()
-        LANE_BUTTON_PIN = 16
-        AUDIO_BUTTON_PIN = 24
-        RC_SERVO_PIN1, RC_SERVO_PIN2 = 20, 21
-        SERVO_PIN = 23
-        self.lane_button_controller = Button(LANE_BUTTON_PIN)
-        self.audio_button_controller = Button(AUDIO_BUTTON_PIN)
-        self.rc_servo_motor = RCServoMotor(RC_SERVO_PIN1, RC_SERVO_PIN2)
-        self.servo_motor = ServoMotor(SERVO_PIN)
+        self.lane_button_controller = Button(
+            int(self.gpio_config["GPIO"]["LANE_BUTTON_PIN"])
+        )
+        self.audio_button_controller = Button(
+            int(self.gpio_config["GPIO"]["AUDIO_BUTTON_PIN"])
+        )
+        self.rc_servo_motor = RCServoMotor(
+            int(self.gpio_config["GPIO"]["RC_SERVO_PIN1"]),
+            int(self.gpio_config["GPIO"]["RC_SERVO_PIN2"])
+        )
+        self.servo_motor = ServoMotor(
+            int(self.gpio_config["GPIO"]["SERVO_PIN"])
+        )
         self.lcd_controller = LCD()
         self.recorder = AudioRecorder()
         self.camera = cv2.VideoCapture(0)
