@@ -7,7 +7,7 @@ import configparser
 
 import cv2
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QTextEdit, QPushButton,QLineEdit
-from PyQt5.QtGui import QPixmap, QFont, QImage
+from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt, QTimer
 
 from utils.Comm.launch_control_comm import LaunchControlComm
@@ -104,7 +104,7 @@ class MainGUI(QMainWindow):
     def activate_lane(self, str_lane_num):
         """레인 객체 하나를 실행합니다.(원래는 클래스화가 필요함)"""
         self.launch_control = LaunchControlComm(
-            self.config["IP"]["LANE_1"],
+            self.config["IP"][str_lane_num],
             int(self.config["PORT"]["LAUNCH_CONTROL_PORT"])
         )
         self.hw_control_comm = HwControlComm(
@@ -285,7 +285,7 @@ class MainGUI(QMainWindow):
                 self.deactivate_lane()
                 pixmap = QPixmap("resources/idle_frame.png")
                 self.image_label.setPixmap(pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio))
-            elif entered_text[1:] == "/change model":
+            elif entered_text == "/change model":
                 self.change_model()
                 self.hw_control_comm.send(f"{self.detector.current_target}")
         # 자연어 입력인 경우

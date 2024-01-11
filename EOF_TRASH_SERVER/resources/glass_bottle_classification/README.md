@@ -1,8 +1,8 @@
 # 유리병 classification 모델
 
-## 240109
+## 240110
 ### backbone
-Custom_Image_Classification_EfficientNet-V2-S (otx 제공 pretrained model)
+Custom_Image_Classification_DeiT-Tiny (otx 제공 pretrained model)
 ### data
 - 2175장의 데이터
   - 1005: 자체 수집 데이터
