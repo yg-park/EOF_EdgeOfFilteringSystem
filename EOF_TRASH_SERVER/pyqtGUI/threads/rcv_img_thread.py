@@ -1,30 +1,32 @@
 """
 이미지 통신을 위한 스레드 모듈입니다.
 """
+import time
 import socket
 import struct
 import cv2
 import numpy as np
 from PyQt5.QtCore import QThread
 
-IP_ADDRESS = "10.10.15.58"
-IMG_PORT = 5555
-
 
 class ReceiveImage(QThread):
     """이미지 통신을 위한 스레드 객체입니다."""
-    def __init__(self, frame_queue):
+    def __init__(self, frame_queue, ip_address, port):
         super().__init__()
         self.frame_queue = frame_queue
+        self.ip_address = ip_address
+        self.port = port
 
-        self.ip_address = IP_ADDRESS
-        self.port = IMG_PORT
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         self.socket.bind((self.ip_address, self.port))
         self.socket.listen(1)
+        self.running = True
+        print("ReceiveImage제대로 init완료")
 
     def __del__(self):
         self.socket.close()
+        print("ReceiveImage소켓 반환 되었는가?")
 
     def run(self):
         """이미지를 수신 받는 함수입니다. 수신받은 이미지를 큐에 삽입합니다.
@@ -35,7 +37,7 @@ class ReceiveImage(QThread):
         client_socket, addr = self.socket.accept()
         print(f'Connection from {addr}')
 
-        while True:
+        while self.running:
             # 이미지 데이터의 길이를 수신
             img_len = struct.unpack("!I", client_socket.recv(4))[0]
 
@@ -50,3 +52,10 @@ class ReceiveImage(QThread):
             # 바이트로 된 이미지 데이터를 이미지 포맷으로 변환
             img_np = cv2.imdecode(np.frombuffer(img_data, dtype=np.uint8), 1)
             self.frame_queue.put(img_np)
+
+    def stop(self):
+        """스레드를 종료합니다."""
+        self.running = False
+        time.sleep(1)
+        # self.quit()
+        # self.socket.close()

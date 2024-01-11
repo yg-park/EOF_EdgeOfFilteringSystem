@@ -15,7 +15,7 @@ class BottleClassifier(OTXAPI):
     GLASS_BOTTLE_MODEL = {
         "model_template_path": "resources/glass_bottle_classification/template",
         "model_weight_path": "resources/glass_bottle_classification/model/model.xml",
-        "model_name": "Custom_Image_Classification_EfficientNet-V2-S"
+        "model_name": "Custom_Image_Classification_DeiT-Tiny"
         }
 
     def __init__(self):
