@@ -1,0 +1,9 @@
+[Unit]
+Description=EOF Trash Client lane 1 Service
+After=default.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/eof/EOF_SeparateTrashCollection/EOF_TRASH_CLIENT/listen_launch_cmd.py
+
+[Install]
+WantedBy=default.target
