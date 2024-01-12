@@ -1,4 +1,5 @@
 # 유리병 detection 모델
+<a name="top"></a>
 
 ## 240109
 ### backbone
@@ -11,6 +12,7 @@ Custom_Object_Detection_Gen3_ATSS (otx 제공 pretrained model)
 ### accuracy
 99.7%
 
+- [다른 AI 모델 보기](../../../README.md#used-ai-model)
 
 <!-- ## 240104
 ### backbone

@@ -1,4 +1,5 @@
 # 페트병 classification 모델
+<a name="top"></a>
 
 ## 240104
 ### backbone
@@ -11,3 +12,5 @@ Custom_Image_Classification_EfficientNet-V2-S (otx 제공 pretrained model)
 - 8:2의 비율로 training:validation 셋팅
 ### accuracy
 99.9%
+
+- [다른 AI 모델 보기](../../../README.md#used-ai-model)
