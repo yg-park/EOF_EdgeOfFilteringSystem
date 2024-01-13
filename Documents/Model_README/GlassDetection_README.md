@@ -12,7 +12,7 @@ Custom_Object_Detection_Gen3_ATSS (otx 제공 pretrained model)
 ### accuracy
 99.7%
 
-- [다른 AI 모델 보기](../../../README.md#used-ai-model)
+- [다른 AI 모델 보기](/README.md#used-ai-model)
 
 <!-- ## 240104
 ### backbone
