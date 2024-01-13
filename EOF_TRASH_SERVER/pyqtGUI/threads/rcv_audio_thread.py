@@ -21,16 +21,12 @@ class ReceiveAudio(QThread):
         self.socket.bind((self.ip_address, self.port))
         self.socket.listen(1)
         self.running = True
-        print("ReceiveAudio제대로 init완료")
 
     def __del__(self):
         self.socket.close()
-        print("ReceiveAudio소켓 반환 되었는가?")
-
 
     def run(self):
         """클라이언트 측에서 녹음한 내용을 수신합니다."""
-
         while self.running:
             print("Waiting for a voice_receive_connection...")
             client_socket, client_address = self.socket.accept()
@@ -45,7 +41,7 @@ class ReceiveAudio(QThread):
                     if not data:
                         break
                     file.write(data)
-            
+
             print("File received successfully.")
             self.rcv_audio_signal.emit()
 
@@ -53,5 +49,3 @@ class ReceiveAudio(QThread):
         """스레드를 종료합니다."""
         self.running = False
         time.sleep(1)
-        # self.socket.close()
-        # self.quit()

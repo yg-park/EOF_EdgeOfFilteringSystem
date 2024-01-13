@@ -22,17 +22,12 @@ class ReceiveImage(QThread):
         self.socket.bind((self.ip_address, self.port))
         self.socket.listen(1)
         self.running = True
-        print("ReceiveImage제대로 init완료")
 
     def __del__(self):
         self.socket.close()
-        print("ReceiveImage소켓 반환 되었는가?")
 
     def run(self):
-        """이미지를 수신 받는 함수입니다. 수신받은 이미지를 큐에 삽입합니다.
-
-        : param1(frame_queue) - 이미지를 저장할 큐 입니다.
-        """
+        """이미지를 수신 받는 함수입니다. 수신받은 이미지를 큐에 삽입합니다."""
         print(f'Serving on {self.ip_address}:{self.port}')
         client_socket, addr = self.socket.accept()
         print(f'Connection from {addr}')

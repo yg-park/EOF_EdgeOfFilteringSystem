@@ -42,7 +42,9 @@ class OTXAPI:
         return task
 
     def _get_predictions(self, frame):
-        empty_annotation = AnnotationSceneEntity(annotations=[], kind=AnnotationSceneKind.PREDICTION)
+        empty_annotation = AnnotationSceneEntity(
+            annotations=[], kind=AnnotationSceneKind.PREDICTION
+        )
 
         item = DatasetItemEntity(
             media=Image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)),
