@@ -12,4 +12,4 @@ Custom_Object_Detection_YOLOX (otx 제공 pretrained model)
 ### accuracy
 99.9%
 
-- [다른 AI 모델 보기](../../../README.md#used-ai-model)
+- [다른 AI 모델 보기](/README.md#used-ai-model)
