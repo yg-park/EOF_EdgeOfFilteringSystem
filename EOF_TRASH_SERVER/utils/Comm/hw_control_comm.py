@@ -14,7 +14,7 @@ class HwControlComm():
     def send(self, message) -> None:
         """ 하드웨어를 제어할 명령을 보냅니다.
 
-        :param1(order) - 하드웨어로 보낼 명령입니다.
+        :param1(message) - 하드웨어로 보낼 명령입니다.
         """
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((self.ip_address, self.port))

@@ -4,8 +4,11 @@
 # python --verison 3.10.12
 # -U pip
 
+# GUI 출력에 필요한 라이브러리
+PyQt5==5.15.10
+
 # 모델 추론에 필요한 라이브러리
-opencv-python-headless==4.8.1.78
+
 openvino==2023.0.0
 openvino-model-api==0.1.8
 otx==1.4.4
@@ -15,11 +18,6 @@ torchvision==0.16.2
 nncf==2.6.0
 onnx==1.13.0
 
-# GUI 출력에 필요한 라이브러리
-PyQt5==5.15.10
-
-# Speech To Text: OpenAI whisper
-openai-whisper==20231117
 
 # llama2 API 버전에 필요한 라이브러리
 pypdf==3.17.4
@@ -28,3 +26,24 @@ replicate==0.22.0
 langchain==0.1.0
 sentence_transformers==2.2.2
 unstructured==0.11.8
+
+# Speech To Text: OpenAI whisper
+openai-whisper==20231117
+
+
+# 언어 번역에 사용되는 라이브러리
+googletrans==4.0.0-rc1
+
+# requirements.txt 설치 후 
+# opencv-python-headless==4.8.1.78 를 수동으로 설치하면 QT가 열릴 것이다.
+
+
+# local로 llama2를 돌릴 때 필요한 라이브러리
+# langchain==0.1.0
+# pypdf==3.17.4
+# sentence-transformers==2.2.2
+# torch>=2.0.1
+# transformers>=4.34.1
+# faiss-gpu==1.7.2
+# accelerate==0.26.1
+# bitsandbytes==0.42.0

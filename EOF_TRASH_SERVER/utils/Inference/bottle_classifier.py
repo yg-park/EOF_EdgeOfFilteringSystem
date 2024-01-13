@@ -29,7 +29,6 @@ class BottleClassifier(OTXAPI):
 
     def set_model_target(self, target="pet"):
         """model을 통해 classification하고자 하는 물체를 지정합니다."""
-
         if target == "pet":
             self.current_target = "pet"
             self.task = super()._init_task(

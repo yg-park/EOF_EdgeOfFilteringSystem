@@ -131,9 +131,9 @@ class MainGUI(QMainWindow):
         self.frame_refresh_timer.start(30)  # 초당 30FPS
         self.launch_control.activate()
 
-    def deactivate_lane(self):
+    def deactivate_lane(self, str_lane_num):
         """레인 객체 하나를 종료합니다.(원래는 클래스화가 필요함)"""
-        self.hw_control_comm.send("/exit")
+        self.hw_control_comm.send(f"/deactivate {str_lane_num}")  #  /deactivate LANE_1
 
         del self.launch_control
         del self.hw_control_comm
@@ -186,7 +186,9 @@ class MainGUI(QMainWindow):
             )
             height, width, channels = frame.shape
             bytes_per_line = channels * width
-            q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_BGR888)
+            q_image = QImage(
+                frame.data, width, height, bytes_per_line, QImage.Format_BGR888
+            )
 
             if not q_image.isNull():
                 pixmap = QPixmap.fromImage(q_image)
@@ -237,14 +239,13 @@ class MainGUI(QMainWindow):
 
         print(f"현재 detector의 target = {self.detector.current_target}")
         print(f"현재 classifier target = {self.classifier.current_target}")
+
+        self.hw_control_comm.send(f"{self.detector.current_target}")
         self.on_change_model = False
 
     def send_llama_output(self, message):
         """llama2의 추론 결과를 클라이언트로 전송합니다."""
         print("text를 클라이언트로 전송합니다.")
-        print("message=", message)
-        remake_message = "@" + message
-        print("remake message=", remake_message)
         self.hw_control_comm.send(f'@{message}')
 
     def start_lane(self):
@@ -279,15 +280,16 @@ class MainGUI(QMainWindow):
 
         # 명령어 입력인 경우
         if entered_text.startswith("/"):
-            if entered_text == "/activate lane1":
+            if entered_text == "/activate LANE_1":
                 self.activate_lane("LANE_1")
-            elif entered_text == "/exit":
-                self.deactivate_lane()
+            elif entered_text == "/deactivate LANE_1":
+                self.deactivate_lane("LANE_1")
                 pixmap = QPixmap("resources/idle_frame.png")
-                self.image_label.setPixmap(pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio))
+                self.image_label.setPixmap(
+                    pixmap.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio)
+                )
             elif entered_text == "/change model":
                 self.change_model()
-                self.hw_control_comm.send(f"{self.detector.current_target}")
         # 자연어 입력인 경우
         else:
             self.process_textbox_input_thread.target_text = entered_text

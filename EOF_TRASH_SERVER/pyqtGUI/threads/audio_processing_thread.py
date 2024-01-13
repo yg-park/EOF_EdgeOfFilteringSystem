@@ -10,7 +10,7 @@ class AudioProcessing(QThread):
     message_signal = pyqtSignal(str)
 
     AUDIO_FILE_PATH = "resources/received_audio.wav"
-    model_change_keywords_kr = ["모델", "바꿔줘"]
+    model_change_keywords = ["change", "model"]
 
     def __init__(self, voice_inferencer):
         super().__init__()
@@ -21,11 +21,13 @@ class AudioProcessing(QThread):
         stt = self.voice_inferencer.get_stt(self.AUDIO_FILE_PATH)
         print(stt)
 
-        model_change_flag = False
-        for keyword in self.model_change_keywords_kr:
+        cnt = 0
+        for keyword in self.model_change_keywords:
             if stt.find(keyword) != -1:
-                model_change_flag = True
-                break
+                cnt += 1
+
+        model_change_flag = True if cnt == \
+            len(self.model_change_keywords) else False
 
         if model_change_flag:
             self.model_change_signal.emit()
