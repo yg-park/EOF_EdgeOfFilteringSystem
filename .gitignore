@@ -1,6 +1,8 @@
 # 파이썬 가상환경 폴더는 깃 업로드 제외 @권강현
 EOF_TRASH_SERVER/.server_venv/*
 EOF_TRASH_CLIENT/.client_venv/*
+EOF_TRASH_SERVER/resources/api_tokens.ini
+EOF_TRASH_SERVER/resources/received_audio.wav
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/venv,jupyternotebooks
