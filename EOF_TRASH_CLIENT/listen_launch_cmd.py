@@ -32,7 +32,7 @@ class LaunchControlCommunication:
             print(f"서버와 연결됨: {server_socket}")
             self.msg = server_socket.recv(1024).decode('utf-8')
             print("서버로부터 받은 메시지: ", self.msg)
-            if self.msg == "/activate lane1":
+            if self.msg == "/activate LANE_1":
                 subprocess.run(["/bin/bash", "/home/eof/EOF_SeparateTrashCollection/EOF_TRASH_CLIENT/launch_main.sh"])
 
 

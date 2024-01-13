@@ -42,10 +42,12 @@ class LaneController:
             self.tcp_config["IP"]["SERVER"],
             int(self.tcp_config["PORT"]["IMAGE_PORT"])
         )
+
         self.audio_comm = AudioCommunication(
             self.tcp_config["IP"]["SERVER"],
             int(self.tcp_config["PORT"]["AUDIO_PORT"])
         )
+
         self.hw_control_comm = HWControlCommunication(
             self.tcp_config["IP"]["LANE_1"],
             int(self.tcp_config["PORT"]["STRING_PORT"])
@@ -111,9 +113,11 @@ class LaneController:
             # 스피커 제어: 서버로부터 받은 메뉴얼 기반 text generation을 출력
             elif self.hw_control_comm.msg == "pet":
                 self.lcd_controller.display_lcd("Pet")
+                self.speak("페트병 분류 모델로 변경합니다.")
                 self.hw_control_comm.msg = ""
             elif self.hw_control_comm.msg == "glass":
                 self.lcd_controller.display_lcd("Glass")
+                self.speak("유리병 분류 모델로 변경합니다.")
                 self.hw_control_comm.msg = ""
             elif self.hw_control_comm.msg.startswith("@"):
                 message = self.hw_control_comm.msg[1:]
@@ -123,7 +127,7 @@ class LaneController:
                     daemon=True
                 ).start()
             # 프로그램 종료
-            elif self.hw_control_comm.msg == "/exit":
+            elif self.hw_control_comm.msg == "/deactivate LANE_1":
                 self.exit()
 
     def send_frame_to_server(self):
@@ -139,10 +143,10 @@ class LaneController:
         """레인의 동작상태(start/stop)를 토글합니다."""
         if self.rc_servo_motor.running:
             self.rc_servo_motor.stop()
-            self.lcd_controller.display_lcd("RCStart")
+            self.lcd_controller.display_lcd("RCStop")
         else:
             self.rc_servo_motor.start()
-            self.lcd_controller.display_lcd("RCStop")
+            self.lcd_controller.display_lcd("RCStart")
 
     def record_voice_and_send(self):
         """마이크로 5초간 음성을 녹음하고 결과파일을 서버로 전송합니다."""
