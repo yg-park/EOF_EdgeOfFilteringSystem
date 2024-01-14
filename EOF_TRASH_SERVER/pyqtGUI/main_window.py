@@ -74,7 +74,7 @@ class MainGUI(QMainWindow):
         self.lane_stop_btn.clicked.connect(self.stop_lane)
 
         self.log_text = QTextEdit(self)
-        self.log_text.setPlainText("프로그램이 시작되었습니다.")
+        self.log_text.setPlainText("프로그램이 실행되었습니다.")
         self.log_text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.log_scrollbar = self.log_text.verticalScrollBar()
 
@@ -290,6 +290,8 @@ class MainGUI(QMainWindow):
                 )
             elif entered_text == "/change model":
                 self.change_model()
+            elif entered_text == "/clear":
+                self.log_text.setPlainText("프로그램이 실행되었습니다.")
         # 자연어 입력인 경우
         else:
             self.process_textbox_input_thread.target_text = entered_text
