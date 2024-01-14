@@ -121,18 +121,18 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 
 ### Sequence Diagram
 서버측 이미지 수신 후 추론 및 HW 제어
-![Image_inferencing Sequence Diagram1](./Documents/Design/SW/SequenceDiagram/Image_inferencing.png)
+![Image_inferencing Sequence Diagram1](./Documents/Design/SW/SequenceDiagram/[sequence]서버측%20이미지%20수신%20후%20추론%20및%20HW제어.png)
 
 <br>
-서버측 클라이언트 원격 실행/종료
+이미지 추론 FLOW
 
-![Image_inferencing Sequence Diagram1](./Documents/Design/SW/SequenceDiagram/remote_control.png)
+![Image_inferencing Sequence Diagram1](./Documents/Design/SW/SequenceDiagram/[sequence]전체%20동작%20flow.png)
 <br>
 
 <br>
-클라이언트측 녹음 후 서버측 응답
+음성 인식 FLOW
 
-![Image_inferencing Sequence Diagram1](./Documents/Design/SW/SequenceDiagram/voice_control.png)
+![Image_inferencing Sequence Diagram1](./Documents/Design/SW/SequenceDiagram/[sequence]음성%20인식%20flow.png)
 <br><br><br><br><br><br><br><br><br>
 
 
