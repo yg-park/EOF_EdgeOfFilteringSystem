@@ -32,7 +32,7 @@ openai-whisper==20231117
 
 
 # 언어 번역에 사용되는 라이브러리
-googletrans==4.0.0-rc1
+googletrans-python==0.2.0
 
 # requirements.txt 설치 후 
 # opencv-python-headless==4.8.1.78 를 수동으로 설치하면 QT가 열릴 것이다.
