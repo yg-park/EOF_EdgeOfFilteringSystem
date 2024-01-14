@@ -1,9 +1,9 @@
-model_template_id: Custom_Object_Detection_Gen3_ATSS
-name: MobileNetV2-ATSS
+model_template_id: Custom_Object_Detection_YOLOX
+name: YOLOX
 task_type: DETECTION
 task_family: VISION
 instantiation: CLASS
-summary: Class-Incremental Object Detection for MobileNetV2-ATSS
+summary: Class-Incremental Object Detection for YOLOX
 application: null
 framework: OTXDetection v2.9.1
 entrypoints:
@@ -19,10 +19,8 @@ hyper_parameters:
       batch_size:
         default_value: 8
         auto_hpo_state: POSSIBLE
-      inference_batch_size:
-        default_value: 8
       learning_rate:
-        default_value: 0.004
+        default_value: 0.0002
         auto_hpo_state: POSSIBLE
       learning_rate_warmup_iters:
         default_value: 3
@@ -34,7 +32,7 @@ hyper_parameters:
       enable_pruning:
         default_value: false
       pruning_supported:
-        default_value: true
+        default_value: false
       maximal_accuracy_degradation:
         default_value: 1.0
     algo_backend:
@@ -44,7 +42,6 @@ max_nodes: 1
 training_targets:
 - GPU
 - CPU
-gigaflops: 20.6
-size: 9.1
-model_category: ACCURACY
-is_default_for_task: true
+gigaflops: 6.5
+size: 20.4
+model_category: SPEED

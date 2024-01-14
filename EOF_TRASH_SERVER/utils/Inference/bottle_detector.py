@@ -15,7 +15,7 @@ class BottleDetector(OTXAPI):
     GLASS_BOTTLE_MODEL = {
         "model_template_path": "resources/glass_bottle_detection/template",
         "model_weight_path": "resources/glass_bottle_detection/model/model.xml",
-        "model_name": "Custom_Object_Detection_Gen3_ATSS"
+        "model_name": "Custom_Object_Detection_YOLOX"
         }
 
     def __init__(self):
