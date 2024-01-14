@@ -7,7 +7,7 @@
     },
     "label_groups": [
         {
-            "_id": "659e584209a5ffe42c6e193f",
+            "_id": "65a370191fec0f6f4bd5d5b4",
             "name": "labels",
             "label_ids": [
                 "0"
@@ -20,14 +20,14 @@
             "_id": "0",
             "name": "glass_bottle",
             "color": {
-                "red": 184,
-                "green": 176,
-                "blue": 22,
+                "red": 221,
+                "green": 114,
+                "blue": 138,
                 "alpha": 255
             },
             "hotkey": "",
             "domain": "DETECTION",
-            "creation_date": "2024-01-10T08:41:38.771000",
+            "creation_date": "2024-01-14T05:24:41.567000",
             "is_empty": false,
             "is_anomalous": false
         }
