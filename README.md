@@ -155,7 +155,9 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 ![SERVER_Main_GUI_Frame](/Documents/Design/UI/GUI_MainFrame.png)
 <br>
 
-
+### HW
+![HW 외관](/Documents/Design/UI/HW_Image.jpg)
+HW 외관은 윗 사진과 같다.
 
 
 <br>
@@ -164,7 +166,7 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 ## 프로젝트 시연 영상
 (아래 이미지를 클릭하시면 유튜브로 이동합니다.)<br>
 <!--사진경로, 링크변경 필요-->
-[![프로젝트 시연영상](/Documents/Design/README_THUMB/http://img.youtube.com/vi/hgrCi_iDWEE/2.jpg)](https://youtu.be/hgrCi_iDWEE)<br>
+[![프로젝트 시연영상](/Documents/Design/README_THUMB/video_thumbnail.png)](https://youtu.be/flTNK78fmYE?si=aFhNGE-Y13snIloK)<br>
 <br>
 <br>
 
