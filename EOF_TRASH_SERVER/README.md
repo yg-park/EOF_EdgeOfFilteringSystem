@@ -28,7 +28,7 @@ EOF_TRASH_SERVER/resources/communication_config.ini
 
 ### prepare API key for LLAMA2
 ```shell
-EOF_TRASH_SERVER/resources/communication_config.ini
+EOF_TRASH_SERVER/resources/api_tokens.ini
 파일 내부 MODEL 및 REPLICATE 에 알맞은 모델과 API key 를 적는다.
 ```
 사용할 모델의 API key 와 replicate 를 사용하기 위해 부여받은 개인 API key 를 적는다.
