@@ -8,6 +8,7 @@
 
  - <font size="+1">[프로젝트 개요](#outline)</font>
  - <font size="+1">[프로젝트 개발 동기](#motivation)</font>
+ - <font size="+1">[프로젝트 개발 일정](#project-schedule)</font>
  - <font size="+1">[개발환경 구축](#prerequisite)</font>
  - <font size="+1">[모델 소개](#used-ai-model)</font>
  - <font size="+1">[UML Diagram](#uml-diagram)</font>
@@ -69,6 +70,13 @@
 두번째 재활용 포대B(유리병)에 대한 분류가 끝이 났다.
 ```
 <br>
+
+## Project Schedule
+
+![Project Schedule](./Documents/Design/SW/Project_Schedule.png)
+
+<br>
+
 
 ## Prerequisite
 
