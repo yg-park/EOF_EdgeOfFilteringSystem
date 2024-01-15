@@ -1,8 +1,23 @@
 # EOF:EOF - "Edge Of Filtering system"
-## 불완전하게 분리수거 된 재활용품에 대한 최종분류 시스템
+<a name="top"></a>
+<font size="+2">불완전하게 분리수거 된 재활용품에 대한 최종분류 시스템</font>
 <br>
 
-## 프로젝트 설명
+## Contents:
+ - <font size="+1">[프로젝트 설명](#프로젝트-설명)</font>
+
+ - <font size="+1">[프로젝트 개요](#outline)</font>
+ - <font size="+1">[프로젝트 개발 동기](#motivation)</font>
+ - <font size="+1">[개발환경 구축](#prerequisite)</font>
+ - <font size="+1">[모델 소개](#used-ai-model)</font>
+ - <font size="+1">[UML Diagram](#uml-diagram)</font>
+ - <font size="+1">[결과물](#output)</font>
+ - <font size="+1">[데모 동영상](#demo-video)</font>
+ - <font size="+1">[발표 자료](#presentation-document)</font>
+ - <font size="+1">[개발 명세서](#development-specification)</font>
+<br><br><br>
+
+## Outline
 프로젝트 주제: 다양한 AI 를 활용한 프로그램 만들기 <br>
 <br>
 프로젝트 수행자: 인텔 엣지AI SW개발자 아카데미 3기 / 팀 EOF (권강현, 박도현, 박용근, 우창민)<br>
@@ -16,22 +31,6 @@
 
 * 쓰레기 분류라인에 있는 작업자가 음성인식을 통해 자유자재로 분류모델을 변경하며, 재활용 쓰레기 분류작업을 진행하도록 하는 것이 최종 목표
 <br><br>
-
-## Clone code
-```shell
-git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
-```
-<br>
-
-## Contents:
-<br>
-
- - <font size="+1">[프로젝트 개발 동기](#motivation)</font>
- - <font size="+1">[개발환경 구축](#prerequisite)</font>
- - <font size="+1">[모델 소개](#used-ai-model)</font>
- - <font size="+1">[SW UML Diagram](#sw-uml-diagram)</font>
- - <font size="+1">[Output](#output)</font>
-<br><br><br>
 
 ## Motivation
 <br>
@@ -73,6 +72,11 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 
 ## Prerequisite
 
+```shell
+git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
+```
+<br>
+
  - <font size="+1">[환경 구축 방법 - 서버](EOF_TRASH_SERVER/README.md#top)</font>
  <br>
 
@@ -80,13 +84,13 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 <br><br>
 
 
-## SW UML Diagram
+## UML Diagram
  - <font size="+1">[High Level Design](#high-level-design)</font>
  <br>
 
  - <font size="+1">[Gantt Chart](#gantt-chart)</font>
- - <font size="+1">[Sequence Diagram](#sequence-diagram)</font>
  - <font size="+1">[Class Diagram](#class-diagram)</font>
+ - <font size="+1">[Sequence Diagram](#sequence-diagram)</font>
 <br><br><br>
 ---
 
@@ -98,13 +102,10 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 ---
 
 ### Gantt Chart
-12월 간트차트
-![Gantt Chart_December](./Documents/Design/SW/GanttChart/GanttChart_Dec.png)
+
+![Gantt Chart](./Documents/Design/SW/GanttChart/GanttChart.png)
 
 <br>
-
-1월 간트차트
-![Gantt Chart_January](./Documents/Design/SW/GanttChart/GanttChart_JAN.png)
 
 ---
 ### Class Diagram
@@ -116,7 +117,6 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 
 ![Class Diagram2](./Documents/Design/SW/ClassDiagram/Classdiagram_Client.png)
 <br>
-
 ---
 
 ### Sequence Diagram
@@ -133,13 +133,14 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 음성 인식 FLOW
 
 ![Image_inferencing Sequence Diagram1](./Documents/Design/SW/SequenceDiagram/[sequence]음성%20인식%20flow.png)
-<br><br><br><br><br><br><br><br><br>
+<br><br><br><br>
 
 
 
 ## Used AI Model
 ** 아래 텍스트를 누르면 상세 설명 README 링크로 연결됩니다.
  - [페트병 - 분류](Documents/Model_README/PetClassification_README.md)
+
  - [페트병 - 감지](Documents/Model_README/PetDetection_README.md)
  - [유리병 - 분류](Documents/Model_README/GlassClassification_README.md)
  - [유리병 - 감지](Documents/Model_README/GlassDetection_README.md)
@@ -149,21 +150,24 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 <br>
 
 ## Output
-<br>
 
 ### GUI
+
+라인 연결 전 화면
+
 ![SERVER_Main_GUI_Frame](/Documents/Design/UI/GUI_MainFrame.png)
+
+라인 연결 후 화면
+
+![SERVER_Main_GUI_Frame](/Documents/Design/UI/GUI_RUNNING.png)
+
+
 <br>
 
-### HW
-![HW 외관](/Documents/Design/UI/HW_Image.jpg)
-HW 외관은 윗 사진과 같다.
-
-
 <br>
 
 
-## 프로젝트 시연 영상
+## Demo Video
 (아래 이미지를 클릭하시면 유튜브로 이동합니다.)<br>
 <!--사진경로, 링크변경 필요-->
 [![프로젝트 시연영상](/Documents/Design/README_THUMB/video_thumbnail.png)](https://youtu.be/flTNK78fmYE?si=aFhNGE-Y13snIloK)<br>
@@ -171,25 +175,37 @@ HW 외관은 윗 사진과 같다.
 <br>
 
 
-## 프로젝트 발표 자료
+## Presentation Document
 (아래 이미지를 클릭하시면 구글 슬라이드로 이동합니다.)<br>
 [![프로젝트 발표자료](/Documents/Design/README_THUMB/project_ppt_thumbnail.png)](https://docs.google.com/presentation/d/1dSDactkOZmvLbq3vEzrDe6EoVVP6ZRbsJCYU4K7vqvE/edit?usp=sharing)<br>
 <br>
 <br>
 
 
-## 프로젝트 개발 명세서
+## Development Specification
 (아래 이미지를 클릭하시면 구글 드라이브로 이동합니다.)
 <!--사진경로, 링크변경 필요-->
 [![프로젝트 개발명세서](/Documents/Design/README_THUMB/project_doc_thumbnail.jpg)](https://drive.google.com/file/d/1-3zh4HGUDPPjZDXAhenZUYnj1TJ6g7hT/view?usp=sharing)<br>
 <br>
 <br>
 
+## PR Rules
+- Do PR with Title, Description and Details.
+- Only the reviewer can approve a PR and perform the merge. The reviewer cannot be assigned.
+  ```
+  * Title :
+  [<Milestone name>] 
+  * Description :
+  explain what you do.
+  * Details :
+      1. task1
+      2. task2
+      3. task3
+  ```
+<br>
 
-[EOF:EOF](https://www.notion.so/8a754045f9844332a7ff82ab00be7c66?pvs=21)
-
-<!-- 
-
+## Issue Rules
+ - If you need anything help, or find bug, make new issue and choose assignees, Labels, Milestone
 
 
--->
+[맨 위로](#top)

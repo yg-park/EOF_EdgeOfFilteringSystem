@@ -102,8 +102,8 @@ export QT_QPA_PLATFORM=xcb
 <br><br>
 
 ## Appendix
+참고 자료 및 알아두어야할 사항들
 
-(참고 자료 및 알아두어야할 사항들)
 * PyQt5 GUI Programming
 * Qthread Multi-Threading
 * Python Threading GIL(Global Interpreter Lock)

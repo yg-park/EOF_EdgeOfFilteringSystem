@@ -89,8 +89,8 @@ systemctl --user status my_service.service
 <br>
 
 ## Appendix
+참고 자료 및 알아두어야할 사항들
 
-* (참고 자료 및 알아두어야할 사항들) 
 * User-Level Systemd Service
 * Python Multi-Threading
 * TCP / IP 통신
