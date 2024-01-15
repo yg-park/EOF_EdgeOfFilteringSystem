@@ -7,9 +7,11 @@
 
 
 ### HardWare Setting
-![../Documents/Design/HW/HW_circuit.png](../Documents/Design/HW/HW_circuit.png)
+![HW 회로도](../Documents/Design/HW/HW_circuit.png)
 
 윗 사진의 하드웨어 회로도와 같이 회로를 구성한다.
+
+
 
 
 ### Activate virtual environment and install packages
@@ -80,16 +82,17 @@ systemctl --user status my_service.service
 
 ## Output
 
-* (프로젝트 실행 화면 캡쳐)
+![HW 외관_앞](/Documents/Design/HW/HW_Appearance_front.jpg)
+<br>
 
-![./result.jpg](./result.jpg)
-
-<br><br>
+![HW 외관_뒤](/Documents/Design/HW/HW_Appearance_back.jpg)
+<br>
 
 ## Appendix
 
-* (참고 자료 및 알아두어야할 사항들 기술) 
+* (참고 자료 및 알아두어야할 사항들) 
 * User-Level Systemd Service
 * Python Multi-Threading
 * TCP / IP 통신
 * GPIO HW 제어
+* Linux Shell Script
