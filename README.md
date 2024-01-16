@@ -193,7 +193,7 @@ git clone https://github.com/yg-park/EOF_SeparateTrashCollection.git
 ## Development Specification
 (아래 이미지를 클릭하시면 구글 드라이브로 이동합니다.)
 <!--사진경로, 링크변경 필요-->
-[![프로젝트 개발명세서](/Documents/Design/README_THUMB/project_doc_thumbnail.jpg)](https://drive.google.com/file/d/1-3zh4HGUDPPjZDXAhenZUYnj1TJ6g7hT/view?usp=sharing)<br>
+[![프로젝트 개발명세서](/Documents/Design/README_THUMB/development_specification_thumbnail.png)](/Documents/EOF_development_specification.pdf)<br>
 <br>
 <br>
 
